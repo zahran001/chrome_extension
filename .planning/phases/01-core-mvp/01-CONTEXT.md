@@ -41,6 +41,12 @@ Keyboard-activated (Alt+S) rubber-band selection over any screen region → DOM 
 - Errors include clickable action buttons where applicable (e.g. "Open Settings" button for key errors)
 - Mid-stream connection failure: preserve partial response, append error notice below it ("Stream interrupted — partial response shown")
 - No raw API error codes shown to users
+- `port.onDisconnect` (SW killed by Chrome — device sleep, network drop) must be explicitly wired to the same mid-stream failure path, not left unhandled
+
+### Implementation Constraints
+- **Shadow DOM CSS:** Use `import styles from './panel.css?inline'` (Vite inline import) + `shadowRoot.adoptedStyleSheets = [sheet]` via `CSSStyleSheet`. Standard CSS imports do not reach inside a Shadow Root — this pattern is required, not optional.
+- **TreeWalker filter:** In addition to skipping `display:none` and zero-opacity nodes, add a zero-dimension fast-fail during the AABB pass: `if (rect.width === 0 || rect.height === 0) return NodeFilter.FILTER_REJECT`. Cheap and catches geometrically-empty nodes without extra style computation.
+- **XSS — hard constraint:** Phase 1 must use `textContent` exclusively when rendering streamed Gemini output. `innerHTML` is prohibited anywhere in Phase 1. Forward note for planner: Phase 2 Markdown rendering must be gated on DOMPurify or equivalent sanitizer before any HTML injection.
 
 ### Claude's Discretion
 - Exact color/accent for the rubber-band selection box (must work on light and dark pages)
