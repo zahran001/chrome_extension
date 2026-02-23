@@ -31,7 +31,16 @@
 4. User can enter and store their Gemini API key via extension popup; first activation without a key auto-opens the popup to prompt setup
 5. Comprehensive test suite covers AABB collision math, TreeWalker text extraction, service worker port lifecycle, and Top Layer dialog injection on static HTML
 
-**Plans**: TBD
+**Plans**: 7 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Project scaffold + Vite/CRXJS/TypeScript build + test infrastructure (all Wave 0 stubs)
+- [ ] 01-02-PLAN.md — BYOK popup: API key input, visibility toggle, test-key validation, save confirmation + storage/keys.ts unit tests
+- [ ] 01-03-PLAN.md — Extraction layer TDD: AABB collision, visibility filter, TreeWalker text extraction
+- [ ] 01-04-PLAN.md — Selection UI content script: Alt+S activation, SVG marching ants, confirm button, Escape cancel + AbortController cleanup
+- [ ] 01-05-PLAN.md — Service worker + Gemini streaming: port-based token streaming, auto-intent prompt, error classification
+- [ ] 01-06-PLAN.md — Result panel: Top Layer dialog, Shadow DOM, word-by-word streaming, copy + retry + error states
+- [ ] 01-07-PLAN.md — Full test suite: E2E test implementation + human verification checkpoint
 
 ---
 
@@ -72,7 +81,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Core MVP | 0/3 | Not started | — |
+| 1. Core MVP | 0/7 | Planned | — |
 | 2. Multimodal Upgrade | 0/2 | Not started | — |
 | 3. Polish | 0/1 | Not started | — |
 
@@ -89,3 +98,4 @@ All requirements have been assigned to exactly one phase. No orphans.
 ---
 
 *Roadmap created: 2026-02-23*
+*Plans created: 2026-02-23 (Phase 1: 7 plans, 5 waves)*
