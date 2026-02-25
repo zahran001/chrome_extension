@@ -1,6 +1,6 @@
 # Project State: Rubber-Band AI
 
-**Last Updated:** 2026-02-25T06:32:26Z
+**Last Updated:** 2026-02-25T06:33:29Z
 
 ---
 
@@ -23,14 +23,14 @@
 ## Current Position
 
 **Phase:** 1 (Core MVP)
-**Current Plan:** 5 of 7
-**Status:** In progress — Plans 01-04 complete, Plan 05 next
+**Current Plan:** 6 of 7
+**Status:** In progress — Plans 01-05 complete, Plan 06 next
 
-**Progress:** [█████░░░░░] 57%
+**Progress:** [████████░░] 71%
 
-**What's Next:** Execute plan 05 — Service worker streaming (LLM-01-04)
+**What's Next:** Execute plan 06 — Content script activation + Gemini integration wiring
 
-**Stopped At:** Completed 01-core-mvp/01-04-PLAN.md
+**Stopped At:** Completed 01-core-mvp/01-05-PLAN.md
 
 ---
 
@@ -40,6 +40,7 @@
 |-------|------|----------|-------|-------|
 | 01-core-mvp | 01-01 | 5min | 2 | 23 |
 | 01-core-mvp | 01-04 | 3min | 2 | 3 |
+| 01-core-mvp | 01-05 | 2min | 2 | 4 |
 
 - **v1 Scope:** 30 requirements across 3 phases
 - **Phase 1 Load:** 25 requirements (Selection, Extraction, Streaming, Panel, BYOK, Testing)
@@ -52,6 +53,7 @@
 | Phase 01-core-mvp P01-01 | 5 | 2 tasks | 23 files |
 | Phase 01-core-mvp P01-02 | 3min | 2 tasks | 5 files |
 | Phase 01-core-mvp P01-03 | 4 | 3 tasks | 6 files |
+| Phase 01-core-mvp P01-05 | 2 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -74,6 +76,9 @@
 15. **panel.ts stub created for static import** (dynamic import unreliable in CRXJS content scripts — Plan 04 creates minimal stub, Plan 06 overwrites with full implementation)
 16. **Dual AbortController pattern** (startAbort for mode lifetime + perDragAbort for drag lifetime — layered cleanup scopes for content-script event listeners)
 17. **port.onDisconnect must be wired before port.onMessage** (CLAUDE.md hard rule — enforced in Plan 04 content-script confirm handler)
+18. **@google/genai SDK (not deprecated @google/generative-ai)** — GoogleGenAI({ apiKey }), ai.models.generateContentStream, config.abortSignal field
+19. **chrome.tabs.create for open-popup** — chrome.action.openPopup() requires user gesture and silently fails from message handlers
+20. **port.onDisconnect wired before await createGeminiClient()** — ensures no disconnect events missed during async client initialization
 
 ### Critical Implementation Notes
 
@@ -102,7 +107,7 @@ All 30 v1 requirements mapped to phases (see ROADMAP.md):
 2. [x] Popup BYOK (KEY-01-04) — storage wrapper + settings popup complete
 3. [x] AABB/TreeWalker (EXT-01-03) — text extraction complete, 23 passing tests
 4. [x] CS activation + rubber-band (SEL-01-04, 06) — SelectionRenderer + content-script state machine complete
-5. Ports + SW streaming (LLM-01-04) — API integration
+5. [x] Ports + SW streaming (LLM-01-04) — service worker + Gemini streaming complete
 6. Dialog render (PNL-01-06) — results display
 7. Integration tests — coverage for all above
 
@@ -114,11 +119,11 @@ All 30 v1 requirements mapped to phases (see ROADMAP.md):
 
 ## Session Continuity
 
-**Last session:** 2026-02-25T06:32:26Z
+**Last session:** 2026-02-25T06:33:29Z
 
-**Handoff:** Plan 04 (Selection UI) complete. SelectionRenderer + full content-script state machine implemented. CustomEvents (rba-token, rba-done, rba-error, rba-interrupted) wired. panel.ts stub created for Plan 06. Plan 05 (service worker streaming) is next.
+**Handoff:** Plan 05 (Service Worker + Gemini Streaming) complete. LLM modules (gemini.ts, prompts.ts, streaming.ts) + full service worker implemented. Port protocol established: generate → token* → done|error. Plan 06 (content script wiring) is next.
 
 ---
 
 *State initialized: 2026-02-23 (roadmapping phase)*
-*Last plan completed: 01-04 on 2026-02-25*
+*Last plan completed: 01-05 on 2026-02-25*

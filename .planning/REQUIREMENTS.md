@@ -25,10 +25,10 @@
 
 ### LLM Integration
 
-- [ ] **LLM-01**: Extension sends extracted content to Gemini API and streams the response token-by-token
-- [ ] **LLM-02**: AI auto-detects intent from content (explain / summarize / solve) — no user mode selection required
-- [ ] **LLM-03**: Streaming uses `chrome.runtime.connect()` long-lived port between service worker and content script
-- [ ] **LLM-04**: Service worker stays alive during streaming via open port connection (active ports prevent SW suspension for up to 5 minutes — sufficient for all expected LLM response durations)
+- [x] **LLM-01**: Extension sends extracted content to Gemini API and streams the response token-by-token
+- [x] **LLM-02**: AI auto-detects intent from content (explain / summarize / solve) — no user mode selection required
+- [x] **LLM-03**: Streaming uses `chrome.runtime.connect()` long-lived port between service worker and content script
+- [x] **LLM-04**: Service worker stays alive during streaming via open port connection (active ports prevent SW suspension for up to 5 minutes — sufficient for all expected LLM response durations)
 
 ### Result Panel
 
@@ -99,10 +99,10 @@
 | EXT-04 | Phase 2 | Pending |
 | EXT-05 | Phase 2 | Pending |
 | EXT-06 | Phase 2 | Pending |
-| LLM-01 | Phase 1 | Pending |
-| LLM-02 | Phase 1 | Pending |
-| LLM-03 | Phase 1 | Pending |
-| LLM-04 | Phase 1 | Pending |
+| LLM-01 | Phase 1 | Complete |
+| LLM-02 | Phase 1 | Complete |
+| LLM-03 | Phase 1 | Complete |
+| LLM-04 | Phase 1 | Complete |
 | PNL-01 | Phase 1 | Pending |
 | PNL-02 | Phase 1 | Pending |
 | PNL-03 | Phase 1 | Pending |
