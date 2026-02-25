@@ -23,14 +23,14 @@
 ## Current Position
 
 **Phase:** 1 (Core MVP)
-**Current Plan:** 3 of 7
-**Status:** In progress — Plans 01-02 complete, Plan 03 next
+**Current Plan:** 4 of 7
+**Status:** In progress — Plans 01-03 complete, Plan 04 next
 
-**Progress:** [███░░░░░░░] 29%
+**Progress:** [████░░░░░░] 43%
 
-**What's Next:** Execute plan 03 — AABB collision + TreeWalker text extraction (SEL/EXT)
+**What's Next:** Execute plan 04 — Top Layer panel + Shadow DOM (PNL-01-06)
 
-**Stopped At:** Completed 01-core-mvp/01-02-PLAN.md
+**Stopped At:** Completed 01-core-mvp/01-03-PLAN.md
 
 ---
 
@@ -50,6 +50,7 @@
 ---
 | Phase 01-core-mvp P01-01 | 5 | 2 tasks | 23 files |
 | Phase 01-core-mvp P01-02 | 3min | 2 tasks | 5 files |
+| Phase 01-core-mvp P01-03 | 4 | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -66,6 +67,9 @@
 9. **Playwright fullyParallel: false** (Chrome extensions require a single shared browser instance; parallel workers each try to load extension separately and fail)
 10. **Gemini key validation via GET /v1beta/models** (zero token cost; 200=valid, 400=invalid, 429=rate-limited; distinct messages shown to user)
 11. **hasApiKey whitespace guard** (returns false for whitespace-only keys — prevents cryptic Gemini errors; trim().length check)
+12. **TreeWalker uses getBoundingClientRect for zero-dim check** (single layout call for both fast-fail and AABB; compatible with JSDOM per-element mock strategy)
+13. **rectsIntersect touching-edge = true (inclusive)** (rubber-band drag to exact element edge still captures text — user intent is to select the element)
+14. **JSDOM mock pattern for extraction tests** (getBoundingClientRect + clientWidth/clientHeight both need mocking; consolidated in mockLayout() helper)
 
 ### Critical Implementation Notes
 
@@ -92,8 +96,8 @@ All 30 v1 requirements mapped to phases (see ROADMAP.md):
 
 1. [x] Scaffold (TST-01-04) — build tooling, test infrastructure, all stubs
 2. [x] Popup BYOK (KEY-01-04) — storage wrapper + settings popup complete
-3. CS activation + canvas (SEL-01-04, 06) — user interaction layer
-4. AABB/TreeWalker (EXT-01-03) — text extraction
+3. [x] AABB/TreeWalker (EXT-01-03) — text extraction complete, 23 passing tests
+4. CS activation + canvas (SEL-01-04, 06) — user interaction layer
 5. Ports + SW streaming (LLM-01-04) — API integration
 6. Dialog render (PNL-01-06) — results display
 7. Integration tests — coverage for all above
@@ -106,11 +110,11 @@ All 30 v1 requirements mapped to phases (see ROADMAP.md):
 
 ## Session Continuity
 
-**Last session:** 2026-02-25T06:24:53.928Z
+**Last session:** 2026-02-25T06:25:46Z
 
-**Handoff:** Plan 02 (BYOK popup) complete. Storage wrapper + settings popup implemented. Plan 03 (AABB + TreeWalker) is next.
+**Handoff:** Plan 03 (AABB + TreeWalker) complete. All 3 extraction modules implemented with 30 passing unit tests. Plan 04 (Top Layer panel) is next.
 
 ---
 
 *State initialized: 2026-02-23 (roadmapping phase)*
-*Last plan completed: 01-02 on 2026-02-25*
+*Last plan completed: 01-03 on 2026-02-25*

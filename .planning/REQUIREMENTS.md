@@ -16,9 +16,9 @@
 
 ### Content Extraction
 
-- [ ] **EXT-01**: Extension uses TreeWalker to extract visible DOM text nodes within selection bounds (fast path)
-- [ ] **EXT-02**: AABB collision test determines which text nodes fall within selection rectangle
-- [ ] **EXT-03**: Visibility filter skips `display:none`, `visibility:hidden`, and zero-opacity nodes
+- [x] **EXT-01**: Extension uses TreeWalker to extract visible DOM text nodes within selection bounds (fast path)
+- [x] **EXT-02**: AABB collision test determines which text nodes fall within selection rectangle
+- [x] **EXT-03**: Visibility filter skips `display:none`, `visibility:hidden`, and zero-opacity nodes
 - [ ] **EXT-04**: Routing heuristic detects visual complexity (canvas, SVG, cross-origin iframe) and selects extraction path
 - [ ] **EXT-05**: Visual fallback path: service worker captures viewport via `captureVisibleTab`, crops via OffscreenCanvas, sends to Gemini Vision
 - [ ] **EXT-06**: Extension gracefully handles restricted pages (chrome://, PDF viewer, Chrome Web Store) — content scripts cannot run on these pages, so the Service Worker must check `tab.url` on hotkey/icon activation and trigger a `chrome.notifications.create` warning instead of attempting dialog injection
@@ -93,9 +93,9 @@
 | SEL-04 | Phase 1 | Pending |
 | SEL-05 | Phase 3 | Pending |
 | SEL-06 | Phase 1 | Pending |
-| EXT-01 | Phase 1 | Pending |
-| EXT-02 | Phase 1 | Pending |
-| EXT-03 | Phase 1 | Pending |
+| EXT-01 | Phase 1 | Complete |
+| EXT-02 | Phase 1 | Complete |
+| EXT-03 | Phase 1 | Complete |
 | EXT-04 | Phase 2 | Pending |
 | EXT-05 | Phase 2 | Pending |
 | EXT-06 | Phase 2 | Pending |

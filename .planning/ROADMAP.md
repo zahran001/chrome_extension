@@ -81,7 +81,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Core MVP | 1/7 | In Progress | — |
+| 1. Core MVP | 3/7 | In Progress|  |
 | 2. Multimodal Upgrade | 0/2 | Not started | — |
 | 3. Polish | 0/1 | Not started | — |
 
