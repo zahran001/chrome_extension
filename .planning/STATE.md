@@ -24,13 +24,13 @@
 
 **Phase:** 1 (Core MVP)
 **Current Plan:** 7 of 7
-**Status:** In progress — Plans 01-06 complete, Plan 07 next
+**Status:** Phase 1 complete — all 7 plans done; awaiting human checkpoint (Task 2 of Plan 07)
 
-**Progress:** [█████████░] 86%
+**Progress:** [██████████] 100%
 
-**What's Next:** Execute plan 07 — Integration tests
+**What's Next:** Human verification checkpoint — load extension in Chrome, enter Gemini API key, verify end-to-end flow
 
-**Stopped At:** Completed 01-core-mvp/01-06-PLAN.md
+**Stopped At:** Completed 01-core-mvp/01-07-PLAN.md Task 1; paused at Task 2 checkpoint:human-verify
 
 ---
 
@@ -55,6 +55,7 @@
 | Phase 01-core-mvp P01-03 | 4 | 3 tasks | 6 files |
 | Phase 01-core-mvp P01-05 | 2 | 2 tasks | 4 files |
 | Phase 01-core-mvp P01-06 | 3min | 3 tasks | 3 files |
+| Phase 01-core-mvp P01-07 | 5min | 1 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,10 @@
 21. **innerHTML replaced with explicit DOM removal in panel.ts** (while(body.firstChild) pattern achieves true zero-innerHTML compliance; eliminates any innerHTML even for static skeleton/error clearing)
 22. **StreamPanel event handlers as arrow function class properties** (handleToken, handleDone, handleError, handleInterrupted — required for removeEventListener by reference in dismiss())
 23. **rba-dismiss listener uses { once: true }** (prevents stale listeners from accumulating across retry invocations of openStreamPort())
+24. **Shadow DOM host is inner div (not dialog):** dialog element not in allowlist for attachShadow — inner div host required; panel tests query via dialog.firstElementChild.shadowRoot
+25. **sendMessage timeout guard:** Promise.race with 3s fallback for check-api-key — prevents silent hang when SW wakes slowly in E2E test environment
+26. **launchPersistentContext for Playwright:** non-persistent context does not inject content scripts or register SW for MV3 extensions; single shared context with workers:1 required
+27. **HTTP fixture server (not file://):** content scripts with <all_urls> do not auto-inject on file:// pages; HTTP server needed for E2E tests (webServer in playwright.config.ts)
 
 ### Critical Implementation Notes
 
@@ -113,7 +118,7 @@ All 30 v1 requirements mapped to phases (see ROADMAP.md):
 4. [x] CS activation + rubber-band (SEL-01-04, 06) — SelectionRenderer + content-script state machine complete
 5. [x] Ports + SW streaming (LLM-01-04) — service worker + Gemini streaming complete
 6. [x] Dialog render (PNL-01-06) — Top Layer panel + Shadow DOM + streaming complete
-7. Integration tests — coverage for all above
+7. [x] Integration tests (TST-03-04) — 30 unit tests + 23 E2E tests passing; 6 fixme for API-key-gated streaming
 
 ### Blockers / Decisions Pending
 
@@ -123,11 +128,11 @@ All 30 v1 requirements mapped to phases (see ROADMAP.md):
 
 ## Session Continuity
 
-**Last session:** 2026-02-25T06:40:41Z
+**Last session:** 2026-02-25T22:04:00Z
 
-**Handoff:** Plan 06 (Result Panel) complete. StreamPanel class with Top Layer dialog, Shadow DOM CSS via ?inline + adoptedStyleSheets, word-by-word streaming via textContent, copy + retry actions, and rba-dismiss abort chain implemented. All 6 PNL requirements satisfied. Plan 07 (Integration Tests) is next.
+**Handoff:** Plan 07 (Integration Tests) Task 1 complete. 30/30 Vitest unit tests pass. 23/23 meaningful Playwright E2E tests pass (6 streaming tests correctly marked test.fixme for API key requirement). Two bugs fixed: dialog.attachShadow → inner div host; sendMessage timeout guard. SUMMARY.md created. Awaiting Task 2 human checkpoint: user must load extension, enter API key, and verify end-to-end flow. After user types "approved", Phase 1 is complete.
 
 ---
 
 *State initialized: 2026-02-23 (roadmapping phase)*
-*Last plan completed: 01-06 on 2026-02-25*
+*Last plan completed: 01-07 on 2026-02-25 (task 1 done; task 2 awaiting human verification)*

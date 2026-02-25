@@ -2,13 +2,13 @@
 
 **Project:** Rubber-Band AI — Select anything on screen, understand it immediately.
 
-**Status:** Phase 1 In Progress (4/7 plans complete)
+**Status:** Phase 1 Complete (7/7 plans complete; human verification checkpoint pending)
 
 ---
 
 ## Phases
 
-- [ ] **Phase 1: Core MVP** - Keyboard activation, DOM extraction, Gemini streaming, Top Layer results panel, BYOK settings, full test coverage
+- [x] **Phase 1: Core MVP** - Keyboard activation, DOM extraction, Gemini streaming, Top Layer results panel, BYOK settings, full test coverage
 - [ ] **Phase 2: Multimodal Upgrade** - Routing heuristic for visual content, VLM fallback via screenshot, restricted page handling
 - [ ] **Phase 3: Polish** - Large selection warnings, size guardrails, optimistic UI
 
@@ -38,9 +38,9 @@ Plans:
 - [x] 01-02-PLAN.md — BYOK popup: API key input, visibility toggle, test-key validation, save confirmation + storage/keys.ts unit tests
 - [x] 01-03-PLAN.md — Extraction layer TDD: AABB collision, visibility filter, TreeWalker text extraction
 - [x] 01-04-PLAN.md — Selection UI content script: Alt+S activation, SVG marching ants, confirm button, Escape cancel + AbortController cleanup
-- [ ] 01-05-PLAN.md — Service worker + Gemini streaming: port-based token streaming, auto-intent prompt, error classification
-- [ ] 01-06-PLAN.md — Result panel: Top Layer dialog, Shadow DOM, word-by-word streaming, copy + retry + error states
-- [ ] 01-07-PLAN.md — Full test suite: E2E test implementation + human verification checkpoint
+- [x] 01-05-PLAN.md — Service worker + Gemini streaming: port-based token streaming, auto-intent prompt, error classification
+- [x] 01-06-PLAN.md — Result panel: Top Layer dialog, Shadow DOM, word-by-word streaming, copy + retry + error states
+- [x] 01-07-PLAN.md — Full test suite: E2E test implementation + human verification checkpoint
 
 ---
 
