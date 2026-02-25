@@ -1,1 +1,99 @@
-export {};
+import { getApiKey, saveApiKey } from './storage/keys';
+
+const apiKeyInput = document.getElementById('api-key') as HTMLInputElement;
+const toggleBtn = document.getElementById('toggle-visibility') as HTMLButtonElement;
+const eyeIcon = document.getElementById('eye-icon') as HTMLSpanElement;
+const keyStatus = document.getElementById('key-status') as HTMLDivElement;
+const testKeyBtn = document.getElementById('test-key') as HTMLButtonElement;
+const saveKeyBtn = document.getElementById('save-key') as HTMLButtonElement;
+
+// Load existing key on open
+async function loadExistingKey(): Promise<void> {
+  const existingKey = await getApiKey();
+  if (existingKey) {
+    apiKeyInput.value = existingKey;
+    showStatus('Key loaded from storage.', 'info');
+  }
+}
+
+// Toggle visibility (password <-> text)
+toggleBtn.addEventListener('click', () => {
+  const isPassword = apiKeyInput.type === 'password';
+  apiKeyInput.type = isPassword ? 'text' : 'password';
+  eyeIcon.textContent = isPassword ? '\u{1F648}' : '\u{1F441}';
+  toggleBtn.setAttribute('aria-label', isPassword ? 'Hide key' : 'Show key');
+});
+
+// Test key: cheap Gemini API validation call
+testKeyBtn.addEventListener('click', async () => {
+  const key = apiKeyInput.value.trim();
+  if (!key) {
+    showStatus('Enter a key first.', 'error');
+    return;
+  }
+
+  testKeyBtn.disabled = true;
+  showStatus('Testing key...', 'info');
+
+  try {
+    // Lightweight validation: list models endpoint
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models?key=${key}`,
+      { method: 'GET' }
+    );
+
+    if (response.ok) {
+      showStatus('Key valid \u2713', 'success');
+    } else if (response.status === 400) {
+      showStatus('API key invalid \u2014 check your key.', 'error');
+    } else if (response.status === 429) {
+      showStatus('Rate limited \u2014 key is valid but quota exceeded.', 'warning');
+    } else {
+      showStatus(`Unexpected error: HTTP ${response.status}`, 'error');
+    }
+  } catch (_err) {
+    showStatus('Network error \u2014 check your connection.', 'error');
+  } finally {
+    testKeyBtn.disabled = false;
+  }
+});
+
+// Save key
+saveKeyBtn.addEventListener('click', async () => {
+  const key = apiKeyInput.value.trim();
+  if (!key) {
+    showStatus('Enter a key first.', 'error');
+    return;
+  }
+
+  saveKeyBtn.disabled = true;
+  try {
+    await saveApiKey(key);
+    // Locked decision: field turns green + "Key saved" message, no auto-close
+    apiKeyInput.classList.add('saved');
+    showStatus('Key saved \u2713', 'success');
+  } catch (_err) {
+    showStatus('Failed to save key. Try again.', 'error');
+  } finally {
+    saveKeyBtn.disabled = false;
+  }
+});
+
+// Clear saved state when user edits
+apiKeyInput.addEventListener('input', () => {
+  apiKeyInput.classList.remove('saved');
+  clearStatus();
+});
+
+function showStatus(message: string, type: 'success' | 'error' | 'warning' | 'info'): void {
+  keyStatus.textContent = message;
+  keyStatus.className = `key-status ${type}`;
+}
+
+function clearStatus(): void {
+  keyStatus.textContent = '';
+  keyStatus.className = 'key-status';
+}
+
+// Initialize
+loadExistingKey();

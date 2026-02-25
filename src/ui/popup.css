@@ -1,0 +1,145 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  color: #1a1a1a;
+  background: #fff;
+  min-width: 320px;
+  max-width: 380px;
+}
+
+.popup-container {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+header h1 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: #666;
+  margin-top: 2px;
+}
+
+.key-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.key-section label {
+  font-weight: 600;
+  font-size: 12px;
+  color: #444;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.input-wrapper {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.input-wrapper input {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: monospace;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.input-wrapper input:focus {
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.15);
+}
+
+.input-wrapper input.saved {
+  border-color: #4CAF50;
+  background: #f0faf0;
+}
+
+.icon-btn {
+  background: none;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  padding: 7px 10px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  transition: background 0.1s;
+}
+
+.icon-btn:hover {
+  background: #f5f5f5;
+}
+
+.key-status {
+  font-size: 12px;
+  min-height: 16px;
+  padding: 0 2px;
+  border-radius: 4px;
+}
+
+.key-status.success { color: #2e7d32; }
+.key-status.error { color: #c62828; }
+.key-status.warning { color: #e65100; }
+.key-status.info { color: #1565c0; }
+
+.button-row {
+  display: flex;
+  gap: 8px;
+}
+
+.primary-btn, .secondary-btn {
+  flex: 1;
+  padding: 9px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+  border: none;
+}
+
+.primary-btn {
+  background: #4CAF50;
+  color: white;
+}
+
+.primary-btn:hover { background: #43A047; }
+.primary-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.secondary-btn {
+  background: #f5f5f5;
+  color: #333;
+  border: 1px solid #d0d0d0;
+}
+
+.secondary-btn:hover { background: #ebebeb; }
+.secondary-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+footer {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 10px;
+}
+
+.footer-note {
+  font-size: 11px;
+  color: #999;
+  text-align: center;
+}
