@@ -2,7 +2,7 @@
 
 **Project:** Rubber-Band AI — Select anything on screen, understand it immediately.
 
-**Status:** Ready for Phase 1
+**Status:** Phase 1 In Progress (1/7 plans complete)
 
 ---
 
@@ -34,7 +34,7 @@
 **Plans**: 7 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Project scaffold + Vite/CRXJS/TypeScript build + test infrastructure (all Wave 0 stubs)
+- [x] 01-01-PLAN.md — Project scaffold + Vite/CRXJS/TypeScript build + test infrastructure (all Wave 0 stubs)
 - [ ] 01-02-PLAN.md — BYOK popup: API key input, visibility toggle, test-key validation, save confirmation + storage/keys.ts unit tests
 - [ ] 01-03-PLAN.md — Extraction layer TDD: AABB collision, visibility filter, TreeWalker text extraction
 - [ ] 01-04-PLAN.md — Selection UI content script: Alt+S activation, SVG marching ants, confirm button, Escape cancel + AbortController cleanup
@@ -81,7 +81,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Core MVP | 0/7 | Planned | — |
+| 1. Core MVP | 1/7 | In Progress | — |
 | 2. Multimodal Upgrade | 0/2 | Not started | — |
 | 3. Polish | 0/1 | Not started | — |
 
