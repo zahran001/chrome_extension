@@ -74,8 +74,13 @@ export class StreamPanel {
       outline: 'none',
     });
 
-    // Shadow DOM (PNL-01 locked: style isolation)
-    this.shadow = dialog.attachShadow({ mode: 'open' });
+    // <dialog> does not support attachShadow per HTML spec (only specific elements do).
+    // Use an inner <div> as the Shadow DOM host instead.
+    const shadowHost = document.createElement('div');
+    dialog.appendChild(shadowHost);
+
+    // Shadow DOM on the inner host (PNL-01 locked: style isolation)
+    this.shadow = shadowHost.attachShadow({ mode: 'open' });
 
     // adoptedStyleSheets pattern (CONTEXT.md REQUIRED implementation constraint)
     const sheet = new CSSStyleSheet();

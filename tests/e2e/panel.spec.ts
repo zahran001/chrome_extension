@@ -57,10 +57,12 @@ test('Panel renders as Top Layer dialog with Shadow DOM on confirm', async ({ pa
   );
   expect(dialogExists).toBe(true);
 
-  // Verify Shadow DOM is attached (PNL-01 — Shadow DOM isolation)
+  // Verify Shadow DOM is attached (PNL-01 — Shadow DOM isolation).
+  // Shadow root is on the inner div host (dialog itself doesn't support attachShadow).
   const hasShadowRoot = await page.evaluate(() => {
     const dialog = document.querySelector('dialog[data-rba="result-panel"]');
-    return dialog !== null && dialog.shadowRoot !== null;
+    const host = dialog?.firstElementChild;
+    return dialog !== null && host !== null && host.shadowRoot !== null;
   });
   expect(hasShadowRoot).toBe(true);
 });
@@ -70,7 +72,8 @@ test('Panel header contains title "Rubber-Band AI"', async ({ page }) => {
 
   const titleText = await page.evaluate(() => {
     const dialog = document.querySelector('dialog[data-rba="result-panel"]');
-    return dialog?.shadowRoot?.querySelector('.panel-title')?.textContent;
+    const shadow = dialog?.firstElementChild?.shadowRoot;
+    return shadow?.querySelector('.panel-title')?.textContent;
   });
   expect(titleText).toBe('Rubber-Band AI');
 });
@@ -81,7 +84,7 @@ test('Close button (X) dismisses panel', async ({ page }) => {
   // Click close button inside Shadow DOM
   await page.evaluate(() => {
     const dialog = document.querySelector('dialog[data-rba="result-panel"]');
-    const closeBtn = dialog?.shadowRoot?.querySelector('.close-btn') as HTMLButtonElement | null;
+    const closeBtn = dialog?.firstElementChild?.shadowRoot?.querySelector('.close-btn') as HTMLButtonElement | null;
     closeBtn?.click();
   });
 
@@ -116,7 +119,8 @@ test('Panel body appears with content (skeleton or setup based on API key state)
   // Panel body must exist in Shadow DOM regardless of mode (loading or setup)
   const hasBody = await page.evaluate(() => {
     const dialog = document.querySelector('dialog[data-rba="result-panel"]');
-    return dialog?.shadowRoot?.querySelector('.panel-body') !== null;
+    const shadow = dialog?.firstElementChild?.shadowRoot;
+    return shadow?.querySelector('.panel-body') !== null;
   });
   expect(hasBody).toBe(true);
 });

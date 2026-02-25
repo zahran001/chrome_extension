@@ -168,8 +168,13 @@ renderer.setOnConfirm(async (selectionRect: DOMRect) => {
 
   // showPanel is statically imported at the top of this file (Issue B fix: no dynamic import)
 
-  // Check for API key (KEY-04)
-  const hasKey = await chrome.runtime.sendMessage({ type: 'check-api-key' });
+  // Check for API key (KEY-04).
+  // Race against a 3s timeout — if the SW is idle and doesn't wake in time,
+  // treat as no-key (safe: shows setup panel instead of hanging silently).
+  const hasKey = await Promise.race([
+    chrome.runtime.sendMessage({ type: 'check-api-key' }).catch(() => false),
+    new Promise<false>(resolve => setTimeout(() => resolve(false), 3000)),
+  ]);
   if (!hasKey) {
     // No key: show setup prompt in panel (per CONTEXT.md first-run decision)
     showPanel({ mode: 'setup' });

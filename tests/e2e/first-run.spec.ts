@@ -80,13 +80,15 @@ test.describe('First-run flow', () => {
       () => document.querySelector('dialog[data-rba="result-panel"]') !== null
     );
 
-    // Check for either setup-btn (no key) or skeleton-container (has key) or panel-body
+    // Check for either setup-btn (no key) or skeleton-container (has key) or panel-body.
+    // Shadow root is on the inner div host (dialog itself doesn't support attachShadow).
     const hasExpectedContent = await page.evaluate(() => {
       const dialog = document.querySelector('dialog[data-rba="result-panel"]');
-      if (!dialog?.shadowRoot) return false;
-      const hasSetup = dialog.shadowRoot.querySelector('.setup-btn') !== null;
-      const hasSkeleton = dialog.shadowRoot.querySelector('.skeleton-container') !== null;
-      const hasBody = dialog.shadowRoot.querySelector('.panel-body') !== null;
+      const shadow = dialog?.firstElementChild?.shadowRoot;
+      if (!shadow) return false;
+      const hasSetup = shadow.querySelector('.setup-btn') !== null;
+      const hasSkeleton = shadow.querySelector('.skeleton-container') !== null;
+      const hasBody = shadow.querySelector('.panel-body') !== null;
       return hasSetup || hasSkeleton || hasBody;
     });
     expect(hasExpectedContent).toBe(true);
