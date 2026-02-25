@@ -107,6 +107,43 @@ function deactivateSelectionMode(): void {
   renderer.cleanup();
 }
 
+/**
+ * Open a long-lived port to the service worker and wire all streaming event handlers.
+ * Handles token forwarding, done/error completion, mid-stream disconnect, and
+ * the rba-dismiss abort chain (panel dismiss → port.disconnect → SW abort.abort()).
+ */
+function openStreamPort(extractedText: string, retryContext?: string): void {
+  const port = chrome.runtime.connect({ name: 'llm-stream' });
+
+  // Wire onDisconnect BEFORE any messages (CLAUDE.md hard rule: port lifecycle)
+  // SW killed mid-stream → dispatch rba-interrupted so panel shows partial response notice
+  port.onDisconnect.addListener(() => {
+    document.dispatchEvent(new CustomEvent('rba-interrupted'));
+  });
+
+  port.onMessage.addListener((msg) => {
+    if (msg.type === 'token') {
+      document.dispatchEvent(new CustomEvent('rba-token', { detail: msg.text }));
+    } else if (msg.type === 'done') {
+      document.dispatchEvent(new CustomEvent('rba-done'));
+      port.disconnect();
+    } else if (msg.type === 'error') {
+      document.dispatchEvent(new CustomEvent('rba-error', { detail: msg }));
+      port.disconnect();
+    }
+  });
+
+  // Abort chain: panel.dismiss() dispatches rba-dismiss → we disconnect port →
+  // SW port.onDisconnect fires → abort.abort() in streaming.ts cancels Gemini HTTP request.
+  // { once: true } ensures listener is auto-removed after first dismiss. (Suggestion A)
+  document.addEventListener('rba-dismiss', () => {
+    port.disconnect();
+  }, { once: true });
+
+  // Send extracted text to service worker (with optional retry context)
+  port.postMessage({ type: 'generate', text: extractedText, retryContext });
+}
+
 // Wire up confirm: extract text, check for key, open streaming port
 renderer.setOnConfirm(async (selectionRect: DOMRect) => {
   deactivateSelectionMode();
@@ -116,7 +153,7 @@ renderer.setOnConfirm(async (selectionRect: DOMRect) => {
 
   // Guard against token explosion (Suggestion B: MAX_CHARS = 20_000)
   if (extractedText.length > MAX_CHARS) {
-    extractedText = extractedText.slice(0, MAX_CHARS) + '\n\n[Selection truncated — too large to send]';
+    extractedText = extractedText.slice(0, MAX_CHARS) + '\n\n[Selection truncated \u2014 too large to send]';
   }
 
   // showPanel is statically imported at the top of this file (Issue B fix: no dynamic import)
@@ -130,33 +167,16 @@ renderer.setOnConfirm(async (selectionRect: DOMRect) => {
   }
 
   // Show panel with loading skeleton (PNL-02)
-  showPanel({ mode: 'loading' });
-
-  // Open long-lived port to service worker (LLM-03)
-  const port = chrome.runtime.connect({ name: 'llm-stream' });
-
-  // Wire onDisconnect BEFORE starting any async work (CLAUDE.md hard rule: port lifecycle)
-  port.onDisconnect.addListener(() => {
-    const interrupted = new CustomEvent('rba-interrupted');
-    document.dispatchEvent(interrupted);
+  // Pass onRetry callback so panel's retry section re-runs the same selection
+  // with the user's additional context appended (Issue F close: retry wiring)
+  showPanel({
+    mode: 'loading',
+    onRetry: (retryContext: string) => {
+      // Re-run the same selection with additional user context
+      openStreamPort(extractedText, retryContext);
+    },
   });
 
-  port.onMessage.addListener((msg) => {
-    if (msg.type === 'token') {
-      // Append to panel (Plan 06 wires this)
-      const panelEvent = new CustomEvent('rba-token', { detail: msg.text });
-      document.dispatchEvent(panelEvent);
-    } else if (msg.type === 'done') {
-      const doneEvent = new CustomEvent('rba-done');
-      document.dispatchEvent(doneEvent);
-      port.disconnect();
-    } else if (msg.type === 'error') {
-      const errorEvent = new CustomEvent('rba-error', { detail: msg });
-      document.dispatchEvent(errorEvent);
-      port.disconnect();
-    }
-  });
-
-  // Send extracted text to service worker
-  port.postMessage({ type: 'generate', text: extractedText });
+  // Open long-lived port to service worker and start streaming (LLM-03)
+  openStreamPort(extractedText);
 });
