@@ -48,10 +48,10 @@
 
 ### Testing
 
-- [ ] **TST-01**: Vitest unit tests cover AABB collision math with edge cases
-- [ ] **TST-02**: Vitest + JSDOM integration tests cover TreeWalker visible text extraction
-- [ ] **TST-03**: Playwright E2E tests cover service worker wakeup and chrome.runtime port lifecycle
-- [ ] **TST-04**: Playwright E2E tests cover Top Layer dialog injection on a static local HTML page
+- [x] **TST-01**: Vitest unit tests cover AABB collision math with edge cases
+- [x] **TST-02**: Vitest + JSDOM integration tests cover TreeWalker visible text extraction
+- [x] **TST-03**: Playwright E2E tests cover service worker wakeup and chrome.runtime port lifecycle
+- [x] **TST-04**: Playwright E2E tests cover Top Layer dialog injection on a static local HTML page
 
 ## v2 Requirements
 
@@ -113,10 +113,10 @@
 | KEY-02 | Phase 1 | Pending |
 | KEY-03 | Phase 1 | Pending |
 | KEY-04 | Phase 1 | Pending |
-| TST-01 | Phase 1 | Pending |
-| TST-02 | Phase 1 | Pending |
-| TST-03 | Phase 1 | Pending |
-| TST-04 | Phase 1 | Pending |
+| TST-01 | Phase 1 | Complete |
+| TST-02 | Phase 1 | Complete |
+| TST-03 | Phase 1 | Complete |
+| TST-04 | Phase 1 | Complete |
 
 **Coverage:**
 - v1 requirements: 30 total

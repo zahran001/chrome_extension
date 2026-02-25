@@ -1,6 +1,6 @@
 # Project State: Rubber-Band AI
 
-**Last Updated:** 2026-02-23
+**Last Updated:** 2026-02-25
 
 ---
 
@@ -15,7 +15,7 @@
 **Tech Stack:**
 - Build: Vite + CRXJS v2 + TypeScript 5.x
 - Test: Vitest + JSDOM + Playwright headful
-- API: @google/generative-ai SDK (Gemini text + vision)
+- API: @google/genai SDK (Gemini text + vision)
 - UI: Native canvas API + Top Layer (dialog.showModal) with Shadow DOM
 
 ---
@@ -23,14 +23,22 @@
 ## Current Position
 
 **Phase:** 1 (Core MVP)
-**Plan:** None started yet
-**Status:** Ready for planning
+**Current Plan:** 2 of 7
+**Status:** In progress — Plan 01 complete, Plan 02 next
 
-**What's Next:** `/gsd:plan-phase 1`
+**Progress:** [#---------] 1/7 plans complete (14%)
+
+**What's Next:** Execute plan 02 — BYOK popup (KEY-01-04)
+
+**Stopped At:** Completed 01-core-mvp/01-01-PLAN.md
 
 ---
 
 ## Performance Metrics
+
+| Phase | Plan | Duration | Tasks | Files |
+|-------|------|----------|-------|-------|
+| 01-core-mvp | 01-01 | 5min | 2 | 23 |
 
 - **v1 Scope:** 30 requirements across 3 phases
 - **Phase 1 Load:** 25 requirements (Selection, Extraction, Streaming, Panel, BYOK, Testing)
@@ -40,6 +48,7 @@
 - **Risk Level:** Low (isolated extension, no backend, BYOK mitigates API dependency)
 
 ---
+| Phase 01-core-mvp P01-01 | 5 | 2 tasks | 23 files |
 
 ## Accumulated Context
 
@@ -51,6 +60,9 @@
 4. **Viewport-locked drag** (bounds selection area — prevents token explosion, keeps heuristic sound)
 5. **Ephemeral results** (privacy-first — no storage risk, simpler state management)
 6. **Auto-detect intent** (removes UX friction — AI infers explain/summarize/solve from content)
+7. **moduleResolution: bundler in tsconfig** (required for Vite 5.x + CRXJS to work correctly; standard Node16 resolution fails with ESM imports)
+8. **CRXJS requires all web_accessible_resources to exist at build time** (src/ui/panel.css stub created in Plan 01 to unblock build; full styles added in Plan 04)
+9. **Playwright fullyParallel: false** (Chrome extensions require a single shared browser instance; parallel workers each try to load extension separately and fail)
 
 ### Critical Implementation Notes
 
@@ -75,25 +87,27 @@ All 30 v1 requirements mapped to phases (see ROADMAP.md):
 
 ### Build Order (Phase 1 Execution Path)
 
-1. Popup BYOK (KEY-01-04) — foundation for all subsequent features
-2. CS activation + canvas (SEL-01-04, 06) — user interaction layer
-3. AABB/TreeWalker (EXT-01-03) — text extraction
-4. Ports + SW streaming (LLM-01-04) — API integration
-5. Dialog render (PNL-01-06) — results display
-6. Testing (TST-01-04) — coverage for all above
+1. [x] Scaffold (TST-01-04) — build tooling, test infrastructure, all stubs
+2. Popup BYOK (KEY-01-04) — foundation for all subsequent features
+3. CS activation + canvas (SEL-01-04, 06) — user interaction layer
+4. AABB/TreeWalker (EXT-01-03) — text extraction
+5. Ports + SW streaming (LLM-01-04) — API integration
+6. Dialog render (PNL-01-06) — results display
+7. Integration tests — coverage for all above
 
 ### Blockers / Decisions Pending
 
-- None yet — all requirements clear, architecture validated
+- None — all requirements clear, architecture validated
 
 ---
 
 ## Session Continuity
 
-**Roadmap Status:** Draft created, awaiting user approval/feedback
+**Last session:** 2026-02-25T06:18:39.052Z
 
-**Handoff to Planning:** After user approval, next step is `/gsd:plan-phase 1` to decompose Phase 1 into executable plans
+**Handoff:** Plan 02 (BYOK popup) ready to execute. All stubs in place, build pipeline working.
 
 ---
 
 *State initialized: 2026-02-23 (roadmapping phase)*
+*Last plan completed: 01-01 on 2026-02-25*
