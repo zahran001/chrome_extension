@@ -1,1 +1,258 @@
-/* Panel styles — filled by Plan 04 */
+/* Shadow DOM reset — host page CSS cannot pierce Shadow Root */
+:host {
+  all: initial;
+  display: block;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.panel-container {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #1a1a1a;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08);
+  width: 480px;
+  max-width: 90vw;
+  max-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Header */
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  flex-shrink: 0;
+}
+
+.panel-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #999;
+  font-size: 16px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  line-height: 1;
+  transition: background 0.1s, color 0.1s;
+}
+
+.close-btn:hover {
+  background: #f5f5f5;
+  color: #333;
+}
+
+/* Response area */
+.panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  min-height: 60px;
+}
+
+.response-text {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Blinking cursor at insertion point (PNL-03) */
+.response-text::after {
+  content: '\25AE';
+  color: #4CAF50;
+  animation: blink-cursor 0.8s step-end infinite;
+  display: inline;
+}
+
+.response-text.streaming-done::after {
+  display: none; /* Remove cursor when streaming completes */
+}
+
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Loading skeleton (PNL-02) */
+.skeleton-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.skeleton-line {
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.2s infinite;
+}
+
+.skeleton-line:nth-child(1) { width: 100%; }
+.skeleton-line:nth-child(2) { width: 85%; }
+.skeleton-line:nth-child(3) { width: 92%; }
+.skeleton-line:nth-child(4) { width: 60%; }
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Error state (PNL-06) */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.error-message {
+  color: #c62828;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.error-action-btn {
+  align-self: flex-start;
+  background: none;
+  border: 1px solid #c62828;
+  color: #c62828;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background 0.1s;
+}
+
+.error-action-btn:hover {
+  background: #ffeaea;
+}
+
+/* Mid-stream interrupted notice */
+.interrupted-notice {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: #fff8e1;
+  border-left: 3px solid #ffc107;
+  border-radius: 0 4px 4px 0;
+  font-size: 12px;
+  color: #6d4c00;
+}
+
+/* Action bar */
+.panel-actions {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid #f0f0f0;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.copy-btn {
+  background: #f5f5f5;
+  border: 1px solid #d0d0d0;
+  color: #333;
+  padding: 7px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background 0.1s;
+}
+
+.copy-btn:hover { background: #ebebeb; }
+.copy-btn.copied { color: #2e7d32; border-color: #4CAF50; }
+
+/* Setup prompt (KEY-04 first-run) */
+.setup-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  text-align: center;
+  padding: 8px 0;
+}
+
+.setup-message {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.5;
+}
+
+.setup-btn {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 9px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+
+.setup-btn:hover { background: #43A047; }
+
+/* Retry section (PNL with retry locked decision) */
+.retry-section {
+  display: flex;
+  gap: 6px;
+  padding: 10px 16px;
+  border-top: 1px solid #f0f0f0;
+  flex-shrink: 0;
+}
+
+.retry-input {
+  flex: 1;
+  padding: 7px 10px;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  font-size: 13px;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+
+.retry-input:focus {
+  border-color: #4CAF50;
+}
+
+.retry-input::placeholder {
+  color: #aaa;
+}
+
+.retry-send-btn {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 7px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.retry-send-btn:hover { background: #43A047; }
+.retry-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
