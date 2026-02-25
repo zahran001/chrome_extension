@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "Rubber-Band AI",
+  "version": "0.1.0",
+  "description": "Select anything on screen, understand it immediately.",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "notifications"
+  ],
+  "host_permissions": ["https://generativelanguage.googleapis.com/*"],
+  "background": {
+    "service_worker": "src/service-worker.ts",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content-script.ts"]
+    }
+  ],
+  "action": {
+    "default_popup": "src/popup.html",
+    "default_title": "Rubber-Band AI Settings"
+  },
+  "commands": {
+    "activate-selection": {
+      "suggested_key": {
+        "default": "Alt+S"
+      },
+      "description": "Activate rubber-band selection mode"
+    }
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src https://generativelanguage.googleapis.com"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["src/ui/panel.css"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
