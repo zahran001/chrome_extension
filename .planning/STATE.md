@@ -23,14 +23,14 @@
 ## Current Position
 
 **Phase:** 1 (Core MVP)
-**Current Plan:** 2 of 7
-**Status:** In progress — Plan 01 complete, Plan 02 next
+**Current Plan:** 3 of 7
+**Status:** In progress — Plans 01-02 complete, Plan 03 next
 
-**Progress:** [#---------] 1/7 plans complete (14%)
+**Progress:** [███░░░░░░░] 29%
 
-**What's Next:** Execute plan 02 — BYOK popup (KEY-01-04)
+**What's Next:** Execute plan 03 — AABB collision + TreeWalker text extraction (SEL/EXT)
 
-**Stopped At:** Completed 01-core-mvp/01-01-PLAN.md
+**Stopped At:** Completed 01-core-mvp/01-02-PLAN.md
 
 ---
 
@@ -49,6 +49,7 @@
 
 ---
 | Phase 01-core-mvp P01-01 | 5 | 2 tasks | 23 files |
+| Phase 01-core-mvp P01-02 | 3min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -63,6 +64,8 @@
 7. **moduleResolution: bundler in tsconfig** (required for Vite 5.x + CRXJS to work correctly; standard Node16 resolution fails with ESM imports)
 8. **CRXJS requires all web_accessible_resources to exist at build time** (src/ui/panel.css stub created in Plan 01 to unblock build; full styles added in Plan 04)
 9. **Playwright fullyParallel: false** (Chrome extensions require a single shared browser instance; parallel workers each try to load extension separately and fail)
+10. **Gemini key validation via GET /v1beta/models** (zero token cost; 200=valid, 400=invalid, 429=rate-limited; distinct messages shown to user)
+11. **hasApiKey whitespace guard** (returns false for whitespace-only keys — prevents cryptic Gemini errors; trim().length check)
 
 ### Critical Implementation Notes
 
@@ -88,7 +91,7 @@ All 30 v1 requirements mapped to phases (see ROADMAP.md):
 ### Build Order (Phase 1 Execution Path)
 
 1. [x] Scaffold (TST-01-04) — build tooling, test infrastructure, all stubs
-2. Popup BYOK (KEY-01-04) — foundation for all subsequent features
+2. [x] Popup BYOK (KEY-01-04) — storage wrapper + settings popup complete
 3. CS activation + canvas (SEL-01-04, 06) — user interaction layer
 4. AABB/TreeWalker (EXT-01-03) — text extraction
 5. Ports + SW streaming (LLM-01-04) — API integration
@@ -103,11 +106,11 @@ All 30 v1 requirements mapped to phases (see ROADMAP.md):
 
 ## Session Continuity
 
-**Last session:** 2026-02-25T06:18:39.052Z
+**Last session:** 2026-02-25T06:24:53.928Z
 
-**Handoff:** Plan 02 (BYOK popup) ready to execute. All stubs in place, build pipeline working.
+**Handoff:** Plan 02 (BYOK popup) complete. Storage wrapper + settings popup implemented. Plan 03 (AABB + TreeWalker) is next.
 
 ---
 
 *State initialized: 2026-02-23 (roadmapping phase)*
-*Last plan completed: 01-01 on 2026-02-25*
+*Last plan completed: 01-02 on 2026-02-25*

@@ -41,10 +41,10 @@
 
 ### BYOK / Settings
 
-- [ ] **KEY-01**: User can enter their Gemini API key via the extension popup
-- [ ] **KEY-02**: API key is persisted in `chrome.storage.local`
-- [ ] **KEY-03**: User can toggle key visibility (show/hide) in the popup
-- [ ] **KEY-04**: On first activation with no key stored, extension automatically opens the popup
+- [x] **KEY-01**: User can enter their Gemini API key via the extension popup
+- [x] **KEY-02**: API key is persisted in `chrome.storage.local`
+- [x] **KEY-03**: User can toggle key visibility (show/hide) in the popup
+- [x] **KEY-04**: On first activation with no key stored, extension automatically opens the popup
 
 ### Testing
 
@@ -109,10 +109,10 @@
 | PNL-04 | Phase 1 | Pending |
 | PNL-05 | Phase 1 | Pending |
 | PNL-06 | Phase 1 | Pending |
-| KEY-01 | Phase 1 | Pending |
-| KEY-02 | Phase 1 | Pending |
-| KEY-03 | Phase 1 | Pending |
-| KEY-04 | Phase 1 | Pending |
+| KEY-01 | Phase 1 | Complete |
+| KEY-02 | Phase 1 | Complete |
+| KEY-03 | Phase 1 | Complete |
+| KEY-04 | Phase 1 | Complete |
 | TST-01 | Phase 1 | Complete |
 | TST-02 | Phase 1 | Complete |
 | TST-03 | Phase 1 | Complete |
