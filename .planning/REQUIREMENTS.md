@@ -32,12 +32,12 @@
 
 ### Result Panel
 
-- [ ] **PNL-01**: Result panel renders as a Top Layer `<dialog>` with Shadow DOM style isolation
-- [ ] **PNL-02**: Panel displays a loading skeleton within 500ms of selection confirmation
-- [ ] **PNL-03**: AI response streams word-by-word into the panel in real time
-- [ ] **PNL-04**: User can copy the full response to clipboard via a copy button
-- [ ] **PNL-05**: User can close panel by pressing Escape or clicking the close button
-- [ ] **PNL-06**: Panel shows distinct, actionable error states: invalid API key / rate limited / network error / restricted page
+- [x] **PNL-01**: Result panel renders as a Top Layer `<dialog>` with Shadow DOM style isolation
+- [x] **PNL-02**: Panel displays a loading skeleton within 500ms of selection confirmation
+- [x] **PNL-03**: AI response streams word-by-word into the panel in real time
+- [x] **PNL-04**: User can copy the full response to clipboard via a copy button
+- [x] **PNL-05**: User can close panel by pressing Escape or clicking the close button
+- [x] **PNL-06**: Panel shows distinct, actionable error states: invalid API key / rate limited / network error / restricted page
 
 ### BYOK / Settings
 
@@ -103,12 +103,12 @@
 | LLM-02 | Phase 1 | Complete |
 | LLM-03 | Phase 1 | Complete |
 | LLM-04 | Phase 1 | Complete |
-| PNL-01 | Phase 1 | Pending |
-| PNL-02 | Phase 1 | Pending |
-| PNL-03 | Phase 1 | Pending |
-| PNL-04 | Phase 1 | Pending |
-| PNL-05 | Phase 1 | Pending |
-| PNL-06 | Phase 1 | Pending |
+| PNL-01 | Phase 1 | Complete |
+| PNL-02 | Phase 1 | Complete |
+| PNL-03 | Phase 1 | Complete |
+| PNL-04 | Phase 1 | Complete |
+| PNL-05 | Phase 1 | Complete |
+| PNL-06 | Phase 1 | Complete |
 | KEY-01 | Phase 1 | Complete |
 | KEY-02 | Phase 1 | Complete |
 | KEY-03 | Phase 1 | Complete |

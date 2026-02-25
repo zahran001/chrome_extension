@@ -1,6 +1,6 @@
 # Project State: Rubber-Band AI
 
-**Last Updated:** 2026-02-25T06:33:29Z
+**Last Updated:** 2026-02-25T06:40:41Z
 
 ---
 
@@ -23,14 +23,14 @@
 ## Current Position
 
 **Phase:** 1 (Core MVP)
-**Current Plan:** 6 of 7
-**Status:** In progress — Plans 01-05 complete, Plan 06 next
+**Current Plan:** 7 of 7
+**Status:** In progress — Plans 01-06 complete, Plan 07 next
 
-**Progress:** [████████░░] 71%
+**Progress:** [█████████░] 86%
 
-**What's Next:** Execute plan 06 — Content script activation + Gemini integration wiring
+**What's Next:** Execute plan 07 — Integration tests
 
-**Stopped At:** Completed 01-core-mvp/01-05-PLAN.md
+**Stopped At:** Completed 01-core-mvp/01-06-PLAN.md
 
 ---
 
@@ -54,6 +54,7 @@
 | Phase 01-core-mvp P01-02 | 3min | 2 tasks | 5 files |
 | Phase 01-core-mvp P01-03 | 4 | 3 tasks | 6 files |
 | Phase 01-core-mvp P01-05 | 2 | 2 tasks | 4 files |
+| Phase 01-core-mvp P01-06 | 3min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -79,6 +80,9 @@
 18. **@google/genai SDK (not deprecated @google/generative-ai)** — GoogleGenAI({ apiKey }), ai.models.generateContentStream, config.abortSignal field
 19. **chrome.tabs.create for open-popup** — chrome.action.openPopup() requires user gesture and silently fails from message handlers
 20. **port.onDisconnect wired before await createGeminiClient()** — ensures no disconnect events missed during async client initialization
+21. **innerHTML replaced with explicit DOM removal in panel.ts** (while(body.firstChild) pattern achieves true zero-innerHTML compliance; eliminates any innerHTML even for static skeleton/error clearing)
+22. **StreamPanel event handlers as arrow function class properties** (handleToken, handleDone, handleError, handleInterrupted — required for removeEventListener by reference in dismiss())
+23. **rba-dismiss listener uses { once: true }** (prevents stale listeners from accumulating across retry invocations of openStreamPort())
 
 ### Critical Implementation Notes
 
@@ -108,7 +112,7 @@ All 30 v1 requirements mapped to phases (see ROADMAP.md):
 3. [x] AABB/TreeWalker (EXT-01-03) — text extraction complete, 23 passing tests
 4. [x] CS activation + rubber-band (SEL-01-04, 06) — SelectionRenderer + content-script state machine complete
 5. [x] Ports + SW streaming (LLM-01-04) — service worker + Gemini streaming complete
-6. Dialog render (PNL-01-06) — results display
+6. [x] Dialog render (PNL-01-06) — Top Layer panel + Shadow DOM + streaming complete
 7. Integration tests — coverage for all above
 
 ### Blockers / Decisions Pending
@@ -119,11 +123,11 @@ All 30 v1 requirements mapped to phases (see ROADMAP.md):
 
 ## Session Continuity
 
-**Last session:** 2026-02-25T06:33:29Z
+**Last session:** 2026-02-25T06:40:41Z
 
-**Handoff:** Plan 05 (Service Worker + Gemini Streaming) complete. LLM modules (gemini.ts, prompts.ts, streaming.ts) + full service worker implemented. Port protocol established: generate → token* → done|error. Plan 06 (content script wiring) is next.
+**Handoff:** Plan 06 (Result Panel) complete. StreamPanel class with Top Layer dialog, Shadow DOM CSS via ?inline + adoptedStyleSheets, word-by-word streaming via textContent, copy + retry actions, and rba-dismiss abort chain implemented. All 6 PNL requirements satisfied. Plan 07 (Integration Tests) is next.
 
 ---
 
 *State initialized: 2026-02-23 (roadmapping phase)*
-*Last plan completed: 01-05 on 2026-02-25*
+*Last plan completed: 01-06 on 2026-02-25*
