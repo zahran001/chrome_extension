@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rubber-Band AI Test Page</title>
+  <style>
+    body { font-family: sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
+    .visible-text { color: #333; }
+    .hidden-text { display: none; }
+    .invisible-text { visibility: hidden; }
+    .zero-opacity { opacity: 0; }
+    .zero-size { width: 0; height: 0; overflow: hidden; }
+  </style>
+</head>
+<body>
+  <h1>Test Page for Rubber-Band AI</h1>
+  <p class="visible-text" id="para-1">
+    This is visible text that should be extracted by the TreeWalker.
+    It contains multiple sentences for testing extraction bounds.
+  </p>
+  <p class="visible-text" id="para-2">
+    A second paragraph with different content.
+    Used to test multi-element extraction within a selection rectangle.
+  </p>
+  <p class="hidden-text" id="hidden-para">
+    This text is hidden and should NOT be extracted.
+  </p>
+  <p class="invisible-text" id="invisible-para">
+    This text is visibility:hidden and should NOT be extracted.
+  </p>
+  <span class="zero-opacity" id="opacity-span">Zero opacity — should NOT be extracted.</span>
+  <div>
+    <span id="nested-span">Nested visible text inside a div.</span>
+  </div>
+</body>
+</html>
