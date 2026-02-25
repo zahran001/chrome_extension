@@ -1,8 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { extractVisibleText } from '../../src/extraction/tree-walker';
 
-// JSDOM does not implement getBoundingClientRect — returns zeros.
-// We mock it on each element to simulate real layout positions.
+// JSDOM limitations:
+// - getBoundingClientRect() always returns zeros — mock per element for layout simulation
+// - clientWidth/clientHeight always return 0 — mock via Object.defineProperty
+// - getComputedStyle() returns empty strings — mock via vi.spyOn(window, 'getComputedStyle')
 
 function makeDOMRect(x: number, y: number, w: number, h: number): DOMRect {
   return {
@@ -20,6 +22,13 @@ function makeDOMRect(x: number, y: number, w: number, h: number): DOMRect {
 
 function mockComputedStyle(display = 'block', visibility = 'visible', opacity = '1') {
   return { display, visibility, opacity } as CSSStyleDeclaration;
+}
+
+/** Apply layout mock to an element: sets getBoundingClientRect + clientWidth/clientHeight */
+function mockLayout(el: HTMLElement, x: number, y: number, w: number, h: number): void {
+  vi.spyOn(el, 'getBoundingClientRect').mockReturnValue(makeDOMRect(x, y, w, h));
+  Object.defineProperty(el, 'clientWidth', { value: w, configurable: true });
+  Object.defineProperty(el, 'clientHeight', { value: h, configurable: true });
 }
 
 describe('TreeWalker text extraction', () => {
@@ -44,7 +53,7 @@ describe('TreeWalker text extraction', () => {
     root.appendChild(p);
 
     vi.spyOn(window, 'getComputedStyle').mockReturnValue(mockComputedStyle());
-    vi.spyOn(p, 'getBoundingClientRect').mockReturnValue(makeDOMRect(10, 10, 100, 20));
+    mockLayout(p, 10, 10, 100, 20);
 
     const result = extractVisibleText(root, selectionBounds);
     expect(result).toContain('Hello world');
@@ -56,7 +65,7 @@ describe('TreeWalker text extraction', () => {
     root.appendChild(p);
 
     vi.spyOn(window, 'getComputedStyle').mockReturnValue(mockComputedStyle('none'));
-    vi.spyOn(p, 'getBoundingClientRect').mockReturnValue(makeDOMRect(10, 10, 100, 20));
+    mockLayout(p, 10, 10, 100, 20);
 
     const result = extractVisibleText(root, selectionBounds);
     expect(result).not.toContain('Hidden text');
@@ -68,7 +77,7 @@ describe('TreeWalker text extraction', () => {
     root.appendChild(p);
 
     vi.spyOn(window, 'getComputedStyle').mockReturnValue(mockComputedStyle('block', 'hidden'));
-    vi.spyOn(p, 'getBoundingClientRect').mockReturnValue(makeDOMRect(10, 10, 100, 20));
+    mockLayout(p, 10, 10, 100, 20);
 
     const result = extractVisibleText(root, selectionBounds);
     expect(result).not.toContain('Invisible text');
@@ -80,7 +89,7 @@ describe('TreeWalker text extraction', () => {
     root.appendChild(p);
 
     vi.spyOn(window, 'getComputedStyle').mockReturnValue(mockComputedStyle('block', 'visible', '0'));
-    vi.spyOn(p, 'getBoundingClientRect').mockReturnValue(makeDOMRect(10, 10, 100, 20));
+    mockLayout(p, 10, 10, 100, 20);
 
     const result = extractVisibleText(root, selectionBounds);
     expect(result).not.toContain('Transparent text');
@@ -92,8 +101,8 @@ describe('TreeWalker text extraction', () => {
     root.appendChild(p);
 
     vi.spyOn(window, 'getComputedStyle').mockReturnValue(mockComputedStyle());
-    // Zero-dimension: width=0 — fast-fail before AABB
-    vi.spyOn(p, 'getBoundingClientRect').mockReturnValue(makeDOMRect(10, 10, 0, 20));
+    // Zero-dimension: width=0 — fast-fail before AABB (per CLAUDE.md constraint)
+    mockLayout(p, 10, 10, 0, 20);
 
     const result = extractVisibleText(root, selectionBounds);
     expect(result).not.toContain('Zero size text');
@@ -107,8 +116,8 @@ describe('TreeWalker text extraction', () => {
     root.appendChild(outer);
 
     vi.spyOn(window, 'getComputedStyle').mockReturnValue(mockComputedStyle());
-    vi.spyOn(outer, 'getBoundingClientRect').mockReturnValue(makeDOMRect(0, 0, 200, 200));
-    vi.spyOn(inner, 'getBoundingClientRect').mockReturnValue(makeDOMRect(10, 10, 80, 20));
+    mockLayout(outer, 0, 0, 200, 200);
+    mockLayout(inner, 10, 10, 80, 20);
 
     const result = extractVisibleText(root, selectionBounds);
     expect(result).toContain('Nested text');
@@ -121,7 +130,7 @@ describe('TreeWalker text extraction', () => {
 
     vi.spyOn(window, 'getComputedStyle').mockReturnValue(mockComputedStyle());
     // Element is far outside selection (300,300) — beyond (0,0)-(200,200) bounds
-    vi.spyOn(p, 'getBoundingClientRect').mockReturnValue(makeDOMRect(300, 300, 100, 20));
+    mockLayout(p, 300, 300, 100, 20);
 
     const result = extractVisibleText(root, selectionBounds);
     expect(result).toBe('');
