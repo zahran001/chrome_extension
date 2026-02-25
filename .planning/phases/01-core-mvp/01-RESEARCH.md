@@ -8,7 +8,7 @@
 
 Phase 1 is a complete, isolated MVP requiring five technical domains: Chrome Extension MV3 foundations (service workers, messaging, storage), DOM interaction (canvas-based rubber-band selection UI, TreeWalker-based text extraction), LLM integration (Gemini API streaming), modern DOM rendering (Top Layer API with Shadow DOM), and comprehensive testing (Vitest + Playwright). The architecture is well-established and stable. All technologies are mature, widely documented, and have active ecosystem support. The primary implementation challenge is coordinating event cleanup (canvas teardown, pointer state restoration) to prevent page freeze and careful DOM visibility filtering to extract only visible text. The architecture deliberately sidesteps alternatives (no custom OCR, no backend state, BYOK eliminates API account complexity).
 
-**Primary recommendation:** Use CRXJS v2 + Vite + TypeScript for build tooling; Gemini API (@google/generative-ai) for streaming; native Chrome APIs (storage.local, runtime.connect, Top Layer dialog) for core features; Vitest + JSDOM for unit tests; Playwright for E2E tests covering service worker lifecycle and Top Layer injection.
+**Primary recommendation:** Use CRXJS v2 + Vite + TypeScript for build tooling; Gemini API (@google/genai — the new SDK replacing deprecated @google/generative-ai) for streaming; native Chrome APIs (storage.local, runtime.connect, Top Layer dialog) for core features; Vitest + JSDOM for unit tests; Playwright for E2E tests covering service worker lifecycle and Top Layer injection.
 
 ---
 
@@ -117,7 +117,7 @@ Phase 1 is a complete, isolated MVP requiring five technical domains: Chrome Ext
 
 | Library | Version | Purpose | When to Use |
 |---------|---------|---------|-------------|
-| @google/generative-ai | 1.42.0+ | Gemini API client with streaming support | Official Google SDK; handles token streaming, supports vision in Phase 2 |
+| @google/genai | 1.0.0+ | Gemini API client with streaming support | New official Google SDK (replaces deprecated @google/generative-ai); handles token streaming, supports vision in Phase 2. Migration note: constructor is `new GoogleGenAI({ apiKey })`, streaming via `ai.models.generateContentStream({ model, contents })`, chunk text accessed as `chunk.text` (not `chunk.text()`). |
 | chrome.runtime.connect() (native) | — | Long-lived message port for service worker ↔ content script | MV3 requirement for streaming; keeps SW alive 5 minutes |
 
 ### Testing
@@ -140,7 +140,7 @@ Phase 1 is a complete, isolated MVP requiring five technical domains: Chrome Ext
 ```bash
 npm install vite @crxjs/vite-plugin typescript
 npm install --save-dev @types/chrome @types/node
-npm install @google/generative-ai
+npm install @google/genai
 npm install --save-dev vitest @vitest/ui jsdom playwright
 ```
 
@@ -669,28 +669,35 @@ function initiateGeminiStream(selectedText: string) {
   port.postMessage({ type: 'generateContent', text: selectedText });
 }
 
-// Service worker
+// Service worker (@google/genai SDK — replaces deprecated @google/generative-ai)
+// Key API differences:
+//   Old: new GoogleGenerativeAI(apiKey) → genAI.getGenerativeModel({ model }) → model.generateContentStream(prompt)
+//   New: new GoogleGenAI({ apiKey }) → ai.models.generateContentStream({ model, contents }) → chunk.text (not chunk.text())
 chrome.runtime.onConnect.addListener((port) => {
   if (port.name === 'gemini-stream') {
+    const abort = new AbortController();
+    port.onDisconnect.addListener(() => abort.abort()); // Wire BEFORE async loop
+
     port.onMessage.addListener(async (message) => {
       if (message.type === 'generateContent') {
         try {
-          const apiKey = await chrome.storage.local.get('geminiApiKey');
-          const genAI = new GoogleGenerativeAI(apiKey.geminiApiKey);
-          const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+          const { geminiApiKey } = await chrome.storage.local.get('geminiApiKey');
+          const ai = new GoogleGenAI({ apiKey: geminiApiKey });
 
-          // Use the SDK's streaming capabilities
-          const stream = await model.generateContentStream({
-            contents: [{ parts: [{ text: message.text }] }]
+          const stream = await ai.models.generateContentStream({
+            model: 'gemini-2.0-flash',
+            contents: [{ role: 'user', parts: [{ text: message.text }] }],
+            config: { abortSignal: abort.signal },
           });
 
-          for await (const chunk of stream.stream) {
-            if (!chunk.text()) continue;
-            port.postMessage({ type: 'token', text: chunk.text() });
+          for await (const chunk of stream) {
+            const text = chunk.text; // Property, not method
+            if (text) port.postMessage({ type: 'token', text });
           }
 
           port.postMessage({ type: 'done' });
         } catch (error) {
+          if (error instanceof Error && error.name === 'AbortError') return;
           port.postMessage({
             type: 'error',
             error: error instanceof Error ? error.message : 'Unknown error'
