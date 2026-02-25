@@ -18,6 +18,16 @@ chrome.runtime.onMessage.addListener((message) => {
   }
 });
 
+// Direct keydown listener for Alt+S — fallback for pages where the Chrome
+// commands API doesn't fire (e.g. file:// pages in tests, extension pages).
+// This mirrors what the SW command handler does, but runs in the content script.
+document.addEventListener('keydown', (e) => {
+  if (e.altKey && (e.key === 's' || e.key === 'S') && !isSelectionMode) {
+    e.preventDefault();
+    activateSelectionMode();
+  }
+}, { capture: true });
+
 function activateSelectionMode(): void {
   if (isSelectionMode) return; // Prevent double-activation
   isSelectionMode = true;
