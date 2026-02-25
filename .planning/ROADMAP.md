@@ -2,7 +2,7 @@
 
 **Project:** Rubber-Band AI — Select anything on screen, understand it immediately.
 
-**Status:** Phase 1 In Progress (1/7 plans complete)
+**Status:** Phase 1 In Progress (4/7 plans complete)
 
 ---
 
@@ -35,9 +35,9 @@
 
 Plans:
 - [x] 01-01-PLAN.md — Project scaffold + Vite/CRXJS/TypeScript build + test infrastructure (all Wave 0 stubs)
-- [ ] 01-02-PLAN.md — BYOK popup: API key input, visibility toggle, test-key validation, save confirmation + storage/keys.ts unit tests
-- [ ] 01-03-PLAN.md — Extraction layer TDD: AABB collision, visibility filter, TreeWalker text extraction
-- [ ] 01-04-PLAN.md — Selection UI content script: Alt+S activation, SVG marching ants, confirm button, Escape cancel + AbortController cleanup
+- [x] 01-02-PLAN.md — BYOK popup: API key input, visibility toggle, test-key validation, save confirmation + storage/keys.ts unit tests
+- [x] 01-03-PLAN.md — Extraction layer TDD: AABB collision, visibility filter, TreeWalker text extraction
+- [x] 01-04-PLAN.md — Selection UI content script: Alt+S activation, SVG marching ants, confirm button, Escape cancel + AbortController cleanup
 - [ ] 01-05-PLAN.md — Service worker + Gemini streaming: port-based token streaming, auto-intent prompt, error classification
 - [ ] 01-06-PLAN.md — Result panel: Top Layer dialog, Shadow DOM, word-by-word streaming, copy + retry + error states
 - [ ] 01-07-PLAN.md — Full test suite: E2E test implementation + human verification checkpoint
@@ -81,7 +81,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Core MVP | 3/7 | In Progress|  |
+| 1. Core MVP | 4/7 | In Progress|  |
 | 2. Multimodal Upgrade | 0/2 | Not started | — |
 | 3. Polish | 0/1 | Not started | — |
 

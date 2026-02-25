@@ -1,6 +1,6 @@
 # Project State: Rubber-Band AI
 
-**Last Updated:** 2026-02-25
+**Last Updated:** 2026-02-25T06:32:26Z
 
 ---
 
@@ -23,14 +23,14 @@
 ## Current Position
 
 **Phase:** 1 (Core MVP)
-**Current Plan:** 4 of 7
-**Status:** In progress — Plans 01-03 complete, Plan 04 next
+**Current Plan:** 5 of 7
+**Status:** In progress — Plans 01-04 complete, Plan 05 next
 
-**Progress:** [████░░░░░░] 43%
+**Progress:** [█████░░░░░] 57%
 
-**What's Next:** Execute plan 04 — Top Layer panel + Shadow DOM (PNL-01-06)
+**What's Next:** Execute plan 05 — Service worker streaming (LLM-01-04)
 
-**Stopped At:** Completed 01-core-mvp/01-03-PLAN.md
+**Stopped At:** Completed 01-core-mvp/01-04-PLAN.md
 
 ---
 
@@ -39,6 +39,7 @@
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
 | 01-core-mvp | 01-01 | 5min | 2 | 23 |
+| 01-core-mvp | 01-04 | 3min | 2 | 3 |
 
 - **v1 Scope:** 30 requirements across 3 phases
 - **Phase 1 Load:** 25 requirements (Selection, Extraction, Streaming, Panel, BYOK, Testing)
@@ -70,6 +71,9 @@
 12. **TreeWalker uses getBoundingClientRect for zero-dim check** (single layout call for both fast-fail and AABB; compatible with JSDOM per-element mock strategy)
 13. **rectsIntersect touching-edge = true (inclusive)** (rubber-band drag to exact element edge still captures text — user intent is to select the element)
 14. **JSDOM mock pattern for extraction tests** (getBoundingClientRect + clientWidth/clientHeight both need mocking; consolidated in mockLayout() helper)
+15. **panel.ts stub created for static import** (dynamic import unreliable in CRXJS content scripts — Plan 04 creates minimal stub, Plan 06 overwrites with full implementation)
+16. **Dual AbortController pattern** (startAbort for mode lifetime + perDragAbort for drag lifetime — layered cleanup scopes for content-script event listeners)
+17. **port.onDisconnect must be wired before port.onMessage** (CLAUDE.md hard rule — enforced in Plan 04 content-script confirm handler)
 
 ### Critical Implementation Notes
 
@@ -97,7 +101,7 @@ All 30 v1 requirements mapped to phases (see ROADMAP.md):
 1. [x] Scaffold (TST-01-04) — build tooling, test infrastructure, all stubs
 2. [x] Popup BYOK (KEY-01-04) — storage wrapper + settings popup complete
 3. [x] AABB/TreeWalker (EXT-01-03) — text extraction complete, 23 passing tests
-4. CS activation + canvas (SEL-01-04, 06) — user interaction layer
+4. [x] CS activation + rubber-band (SEL-01-04, 06) — SelectionRenderer + content-script state machine complete
 5. Ports + SW streaming (LLM-01-04) — API integration
 6. Dialog render (PNL-01-06) — results display
 7. Integration tests — coverage for all above
@@ -110,11 +114,11 @@ All 30 v1 requirements mapped to phases (see ROADMAP.md):
 
 ## Session Continuity
 
-**Last session:** 2026-02-25T06:25:46Z
+**Last session:** 2026-02-25T06:32:26Z
 
-**Handoff:** Plan 03 (AABB + TreeWalker) complete. All 3 extraction modules implemented with 30 passing unit tests. Plan 04 (Top Layer panel) is next.
+**Handoff:** Plan 04 (Selection UI) complete. SelectionRenderer + full content-script state machine implemented. CustomEvents (rba-token, rba-done, rba-error, rba-interrupted) wired. panel.ts stub created for Plan 06. Plan 05 (service worker streaming) is next.
 
 ---
 
 *State initialized: 2026-02-23 (roadmapping phase)*
-*Last plan completed: 01-03 on 2026-02-25*
+*Last plan completed: 01-04 on 2026-02-25*

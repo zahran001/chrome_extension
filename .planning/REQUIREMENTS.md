@@ -7,12 +7,12 @@
 
 ### Selection & Activation
 
-- [ ] **SEL-01**: User can activate rubber-band selection mode via keyboard shortcut (Alt+S default)
-- [ ] **SEL-02**: Cursor changes to crosshair when selection mode is active
-- [ ] **SEL-03**: User sees a real-time rubber-band rectangle while dragging
-- [ ] **SEL-04**: Scrolling is disabled during drag (viewport-locked selection)
+- [x] **SEL-01**: User can activate rubber-band selection mode via keyboard shortcut (Alt+S default)
+- [x] **SEL-02**: Cursor changes to crosshair when selection mode is active
+- [x] **SEL-03**: User sees a real-time rubber-band rectangle while dragging
+- [x] **SEL-04**: Scrolling is disabled during drag (viewport-locked selection)
 - [ ] **SEL-05**: A non-blocking warning overlay appears when selection exceeds 800×800px
-- [ ] **SEL-06**: User can cancel selection at any time by pressing Escape
+- [x] **SEL-06**: User can cancel selection at any time by pressing Escape
 
 ### Content Extraction
 
@@ -87,12 +87,12 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SEL-01 | Phase 1 | Pending |
-| SEL-02 | Phase 1 | Pending |
-| SEL-03 | Phase 1 | Pending |
-| SEL-04 | Phase 1 | Pending |
+| SEL-01 | Phase 1 | Complete |
+| SEL-02 | Phase 1 | Complete |
+| SEL-03 | Phase 1 | Complete |
+| SEL-04 | Phase 1 | Complete |
 | SEL-05 | Phase 3 | Pending |
-| SEL-06 | Phase 1 | Pending |
+| SEL-06 | Phase 1 | Complete |
 | EXT-01 | Phase 1 | Complete |
 | EXT-02 | Phase 1 | Complete |
 | EXT-03 | Phase 1 | Complete |
