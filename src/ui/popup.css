@@ -133,6 +133,22 @@ header h1 {
 .secondary-btn:hover { background: #ebebeb; }
 .secondary-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+.danger-btn {
+  flex: 1;
+  padding: 9px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+  border: 1px solid #ffcdd2;
+  background: #fff5f5;
+  color: #c62828;
+}
+
+.danger-btn:hover { background: #ffebee; }
+.danger-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
 footer {
   border-top: 1px solid #f0f0f0;
   padding-top: 10px;

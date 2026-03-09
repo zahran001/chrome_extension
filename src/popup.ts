@@ -1,4 +1,4 @@
-import { getApiKey, saveApiKey } from './storage/keys';
+import { getApiKey, saveApiKey, clearApiKey } from './storage/keys';
 
 const apiKeyInput = document.getElementById('api-key') as HTMLInputElement;
 const toggleBtn = document.getElementById('toggle-visibility') as HTMLButtonElement;
@@ -6,6 +6,7 @@ const eyeIcon = document.getElementById('eye-icon') as HTMLSpanElement;
 const keyStatus = document.getElementById('key-status') as HTMLDivElement;
 const testKeyBtn = document.getElementById('test-key') as HTMLButtonElement;
 const saveKeyBtn = document.getElementById('save-key') as HTMLButtonElement;
+const clearKeyBtn = document.getElementById('clear-key') as HTMLButtonElement;
 
 // Load existing key on open
 async function loadExistingKey(): Promise<void> {
@@ -76,6 +77,21 @@ saveKeyBtn.addEventListener('click', async () => {
     showStatus('Failed to save key. Try again.', 'error');
   } finally {
     saveKeyBtn.disabled = false;
+  }
+});
+
+// Clear key from storage
+clearKeyBtn.addEventListener('click', async () => {
+  clearKeyBtn.disabled = true;
+  try {
+    await clearApiKey();
+    apiKeyInput.value = '';
+    apiKeyInput.classList.remove('saved');
+    showStatus('Key cleared.', 'info');
+  } catch (_err) {
+    showStatus('Failed to clear key.', 'error');
+  } finally {
+    clearKeyBtn.disabled = false;
   }
 });
 
