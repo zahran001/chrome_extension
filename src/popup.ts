@@ -69,9 +69,9 @@ saveKeyBtn.addEventListener('click', async () => {
   saveKeyBtn.disabled = true;
   try {
     await saveApiKey(key);
-    // Locked decision: field turns green + "Key saved" message, no auto-close
     apiKeyInput.classList.add('saved');
     showStatus('Key saved \u2713', 'success');
+    setTimeout(() => window.close(), 800);
   } catch (_err) {
     showStatus('Failed to save key. Try again.', 'error');
   } finally {

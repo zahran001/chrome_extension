@@ -22,9 +22,13 @@ chrome.runtime.onMessage.addListener((message) => {
 // commands API doesn't fire (e.g. file:// pages in tests, extension pages).
 // This mirrors what the SW command handler does, but runs in the content script.
 document.addEventListener('keydown', (e) => {
-  if (e.altKey && (e.key === 's' || e.key === 'S') && !isSelectionMode) {
+  if (e.altKey && (e.key === 's' || e.key === 'S')) {
     e.preventDefault();
-    activateSelectionMode();
+    if (isSelectionMode) {
+      deactivateSelectionMode();
+    } else {
+      activateSelectionMode();
+    }
   }
 }, { capture: true });
 
@@ -56,6 +60,8 @@ function activateSelectionMode(): void {
 
 function onMouseDown(e: MouseEvent): void {
   if (e.button !== 0) return; // Left click only
+  // Don't intercept clicks on the confirm button itself
+  if ((e.target as Element)?.id === 'rubber-band-ai-confirm') return;
   e.preventDefault();
 
   isDragging = true;
@@ -123,15 +129,17 @@ function deactivateSelectionMode(): void {
  * the rba-dismiss abort chain (panel dismiss → port.disconnect → SW abort.abort()).
  */
 function openStreamPort(extractedText: string, retryContext?: string): void {
+  console.log('[RBA] Opening port llm-stream...');
   const port = chrome.runtime.connect({ name: 'llm-stream' });
+  console.log('[RBA] Port opened:', port);
 
-  // Wire onDisconnect BEFORE any messages (CLAUDE.md hard rule: port lifecycle)
-  // SW killed mid-stream → dispatch rba-interrupted so panel shows partial response notice
   port.onDisconnect.addListener(() => {
+    console.log('[RBA] Port disconnected, lastError:', chrome.runtime.lastError);
     document.dispatchEvent(new CustomEvent('rba-interrupted'));
   });
 
   port.onMessage.addListener((msg) => {
+    console.log('[RBA] Port message:', msg.type, msg.type === 'token' ? msg.text?.slice(0, 20) : msg);
     if (msg.type === 'token') {
       document.dispatchEvent(new CustomEvent('rba-token', { detail: msg.text }));
     } else if (msg.type === 'done') {
@@ -156,25 +164,25 @@ function openStreamPort(extractedText: string, retryContext?: string): void {
 
 // Wire up confirm: extract text, check for key, open streaming port
 renderer.setOnConfirm(async (selectionRect: DOMRect) => {
+  console.log('[RBA] Analyze clicked, rect:', selectionRect);
   deactivateSelectionMode();
 
   // Extract visible text from selection bounds (EXT-01, EXT-02, EXT-03)
   let extractedText = extractVisibleText(document.documentElement, selectionRect);
+  console.log('[RBA] Extracted text length:', extractedText.length, 'preview:', extractedText.slice(0, 100));
 
   // Guard against token explosion (Suggestion B: MAX_CHARS = 20_000)
   if (extractedText.length > MAX_CHARS) {
     extractedText = extractedText.slice(0, MAX_CHARS) + '\n\n[Selection truncated \u2014 too large to send]';
   }
 
-  // showPanel is statically imported at the top of this file (Issue B fix: no dynamic import)
-
   // Check for API key (KEY-04).
-  // Race against a 3s timeout — if the SW is idle and doesn't wake in time,
-  // treat as no-key (safe: shows setup panel instead of hanging silently).
+  console.log('[RBA] Checking API key...');
   const hasKey = await Promise.race([
-    chrome.runtime.sendMessage({ type: 'check-api-key' }).catch(() => false),
-    new Promise<false>(resolve => setTimeout(() => resolve(false), 3000)),
+    chrome.runtime.sendMessage({ type: 'check-api-key' }).catch((err) => { console.log('[RBA] check-api-key error:', err); return false; }),
+    new Promise<false>(resolve => setTimeout(() => { console.log('[RBA] check-api-key TIMED OUT'); resolve(false); }, 3000)),
   ]);
+  console.log('[RBA] hasKey:', hasKey);
   if (!hasKey) {
     // No key: show setup prompt in panel (per CONTEXT.md first-run decision)
     showPanel({ mode: 'setup' });
@@ -182,15 +190,14 @@ renderer.setOnConfirm(async (selectionRect: DOMRect) => {
   }
 
   // Show panel with loading skeleton (PNL-02)
-  // Pass onRetry callback so panel's retry section re-runs the same selection
-  // with the user's additional context appended (Issue F close: retry wiring)
+  console.log('[RBA] Showing panel...');
   showPanel({
     mode: 'loading',
     onRetry: (retryContext: string) => {
-      // Re-run the same selection with additional user context
       openStreamPort(extractedText, retryContext);
     },
   });
+  console.log('[RBA] Panel shown, opening stream port...');
 
   // Open long-lived port to service worker and start streaming (LLM-03)
   openStreamPort(extractedText);

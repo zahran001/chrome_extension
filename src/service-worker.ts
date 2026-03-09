@@ -11,7 +11,8 @@ chrome.commands.onCommand.addListener(async (command) => {
     if (!activeTab?.id) return;
 
     // Send activation message to content script
-    chrome.tabs.sendMessage(activeTab.id, { type: 'activate-selection' });
+    // Content scripts aren't injected on chrome:// or extension pages — swallow the error
+    chrome.tabs.sendMessage(activeTab.id, { type: 'activate-selection' }).catch(() => {});
   }
 });
 

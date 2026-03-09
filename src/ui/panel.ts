@@ -22,7 +22,7 @@ export function showPanel(options: PanelOptions): StreamPanel {
 
 export class StreamPanel {
   private dialog: HTMLDialogElement;
-  private shadow: ShadowRoot;
+  private shadow!: ShadowRoot;
   private responseEl: HTMLDivElement | null = null;
   private accumulatedText = '';
   private onRetry: ((ctx: string) => void) | null = null;

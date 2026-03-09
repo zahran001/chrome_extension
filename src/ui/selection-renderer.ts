@@ -137,22 +137,28 @@ export class SelectionRenderer {
 
     const btn = document.createElement('button');
     btn.id = 'rubber-band-ai-confirm';
-    btn.setAttribute('aria-label', 'Submit selection to AI');
-    btn.textContent = '\u2192';
+    btn.setAttribute('aria-label', 'Analyze selection with AI');
+    btn.textContent = 'Analyze';
+
+    // Clamp to viewport so button is never off-screen
+    const btnWidth = 80;
+    const btnHeight = 32;
+    const clampedLeft = Math.min(rightX + 6, document.documentElement.clientWidth - btnWidth - 8);
+    const clampedTop = Math.min(bottomY + 6, document.documentElement.clientHeight - btnHeight - 8);
 
     // Position just outside bottom-right corner (per CONTEXT.md locked decision)
     Object.assign(btn.style, {
       position: 'fixed',
-      left: `${rightX + 6}px`,
-      top: `${bottomY + 6}px`,
+      left: `${clampedLeft}px`,
+      top: `${clampedTop}px`,
       zIndex: '2147483647',
       background: '#4CAF50',
       color: 'white',
       border: 'none',
-      borderRadius: '50%',
-      width: '32px',
-      height: '32px',
-      fontSize: '16px',
+      borderRadius: '6px',
+      padding: '6px 12px',
+      fontSize: '13px',
+      fontWeight: '600',
       cursor: 'pointer',
       display: 'flex',
       alignItems: 'center',
@@ -160,6 +166,7 @@ export class SelectionRenderer {
       boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
       fontFamily: 'sans-serif',
       lineHeight: '1',
+      whiteSpace: 'nowrap',
     });
 
     btn.addEventListener('click', () => {
