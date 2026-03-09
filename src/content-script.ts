@@ -152,7 +152,7 @@ function openStreamPort(extractedText: string, retryContext?: string): void {
   });
 
   // Abort chain: panel.dismiss() dispatches rba-dismiss → we disconnect port →
-  // SW port.onDisconnect fires → abort.abort() in streaming.ts cancels Gemini HTTP request.
+  // SW port.onDisconnect fires → abort.abort() in streaming.ts cancels OpenAI HTTP request.
   // { once: true } ensures listener is auto-removed after first dismiss. (Suggestion A)
   document.addEventListener('rba-dismiss', () => {
     port.disconnect();

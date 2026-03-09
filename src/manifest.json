@@ -9,7 +9,7 @@
     "scripting",
     "notifications"
   ],
-  "host_permissions": ["https://generativelanguage.googleapis.com/*", "*://*/*"],
+  "host_permissions": ["https://api.openai.com/*", "*://*/*"],
   "background": {
     "service_worker": "src/service-worker.ts",
     "type": "module"
@@ -17,7 +17,8 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["src/content-script.ts"]
+      "js": ["src/content-script.ts"],
+      "all_frames": true
     }
   ],
   "action": {
@@ -33,7 +34,7 @@
     }
   },
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'; connect-src https://generativelanguage.googleapis.com"
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src https://api.openai.com"
   },
   "web_accessible_resources": [
     {

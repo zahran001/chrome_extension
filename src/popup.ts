@@ -39,13 +39,13 @@ testKeyBtn.addEventListener('click', async () => {
   try {
     // Lightweight validation: list models endpoint
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models?key=${key}`,
-      { method: 'GET' }
+      'https://api.openai.com/v1/models',
+      { method: 'GET', headers: { Authorization: `Bearer ${key}` } }
     );
 
     if (response.ok) {
       showStatus('Key valid \u2713', 'success');
-    } else if (response.status === 400) {
+    } else if (response.status === 401) {
       showStatus('API key invalid \u2014 check your key.', 'error');
     } else if (response.status === 429) {
       showStatus('Rate limited \u2014 key is valid but quota exceeded.', 'warning');

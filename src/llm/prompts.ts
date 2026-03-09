@@ -1,10 +1,10 @@
 /**
- * Build a Gemini prompt that auto-detects intent from the selected content.
+ * Build an OpenAI chat prompt that auto-detects intent from the selected content.
  * The AI decides whether to explain, summarize, or solve based on the content itself.
  * This removes the need for user mode selection (LLM-02).
  */
-export function buildPrompt(selectedText: string, retryContext?: string): string {
-  const systemInstruction = `You are a helpful AI assistant embedded in a browser extension called Rubber-Band AI.
+export function buildPrompt(selectedText: string, retryContext?: string): { system: string; user: string } {
+  const system = `You are a helpful AI assistant embedded in a browser extension called Rubber-Band AI.
 The user has selected a region of a webpage and wants immediate understanding.
 
 Automatically detect the user's intent from the content:
@@ -19,9 +19,9 @@ Rules:
 - If the selected text is too short or unclear, say so briefly.
 - Respond in the same language as the selected text.`;
 
-  const userContent = retryContext
+  const user = retryContext
     ? `Selected content:\n${selectedText}\n\nAdditional context from user:\n${retryContext}`
     : `Selected content:\n${selectedText}`;
 
-  return `${systemInstruction}\n\n${userContent}`;
+  return { system, user };
 }

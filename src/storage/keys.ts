@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'geminiApiKey';
+const STORAGE_KEY = 'openaiApiKey';
 
 export async function getApiKey(): Promise<string | null> {
   const result = await chrome.storage.local.get(STORAGE_KEY);

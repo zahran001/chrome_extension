@@ -139,7 +139,7 @@ export class StreamPanel {
     const msg = document.createElement('p');
     msg.className = 'setup-message';
     // textContent only — no user data
-    msg.textContent = 'Add your Gemini API key to get started.';
+    msg.textContent = 'Add your OpenAI API key to get started.';
 
     const setupBtn = document.createElement('button');
     setupBtn.className = 'setup-btn';
@@ -300,7 +300,7 @@ export class StreamPanel {
     container.appendChild(retrySection);
   }
 
-  /** Dismiss (close) the panel and cancel any in-flight Gemini request */
+  /** Dismiss (close) the panel and cancel any in-flight OpenAI request */
   dismiss(): void {
     if (this.escapeHandler) {
       document.removeEventListener('keydown', this.escapeHandler, { capture: true });
@@ -312,7 +312,7 @@ export class StreamPanel {
     document.removeEventListener('rba-error', this.handleError as EventListener);
     document.removeEventListener('rba-interrupted', this.handleInterrupted as EventListener);
 
-    // Cancel in-flight Gemini request to stop BYOK charges (Suggestion A).
+    // Cancel in-flight OpenAI request to stop BYOK charges (Suggestion A).
     // Send 'rba-dismiss' CustomEvent — content-script listener calls port.disconnect()
     // which triggers port.onDisconnect in service worker, firing abort.abort() in streaming.ts.
     document.dispatchEvent(new CustomEvent('rba-dismiss'));
