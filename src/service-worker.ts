@@ -22,7 +22,10 @@ chrome.commands.onCommand.addListener(async (command) => {
  */
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === 'check-api-key') {
-    hasApiKey().then(sendResponse);
+    hasApiKey().then(result => {
+      console.log('[RBA SW] check-api-key result:', result);
+      sendResponse(result);
+    });
     return true; // Keep channel open for async response
   }
 
