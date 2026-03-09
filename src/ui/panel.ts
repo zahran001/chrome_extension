@@ -1,11 +1,13 @@
 // Vite inline import — REQUIRED for Shadow DOM CSS (per CONTEXT.md locked decision)
 import panelStyles from './panel.css?inline';
 
-export type PanelMode = 'loading' | 'setup' | 'streaming' | 'done' | 'error';
+export type PanelMode = 'loading' | 'setup' | 'streaming' | 'done' | 'error' | 'scratchpad';
 
 export interface PanelOptions {
   mode: PanelMode;
   onRetry?: (retryContext: string) => void;
+  onSend?: (text: string) => void;
+  initialText?: string;
 }
 
 let activePanel: StreamPanel | null = null;
@@ -23,13 +25,19 @@ export function showPanel(options: PanelOptions): StreamPanel {
 export class StreamPanel {
   private dialog: HTMLDialogElement;
   private shadow!: ShadowRoot;
+  private titleEl: HTMLSpanElement | null = null;
   private responseEl: HTMLDivElement | null = null;
   private accumulatedText = '';
   private onRetry: ((ctx: string) => void) | null = null;
+  private onSend: ((text: string) => void) | null = null;
   private escapeHandler: ((e: KeyboardEvent) => void) | null = null;
+  /** True only after a stream port has been opened — guards rba-dismiss from firing prematurely */
+  hasActiveStream = false;
+  private dragAbort: AbortController | null = null;
 
   constructor(options: PanelOptions) {
     this.onRetry = options.onRetry ?? null;
+    this.onSend = options.onSend ?? null;
     this.dialog = this.createDialog();
     document.documentElement.appendChild(this.dialog);
     this.dialog.showModal(); // Top Layer (PNL-01)
@@ -47,6 +55,7 @@ export class StreamPanel {
     switch (options.mode) {
       case 'loading': this.showSkeleton(); break;
       case 'setup': this.showSetup(); break;
+      case 'scratchpad': this.showScratchpad(options.initialText ?? ''); break;
       default: this.showSkeleton(); break;
     }
 
@@ -97,6 +106,7 @@ export class StreamPanel {
     const title = document.createElement('span');
     title.className = 'panel-title';
     title.textContent = 'Rubber-Band AI';
+    this.titleEl = title;
 
     const closeBtn = document.createElement('button');
     closeBtn.className = 'close-btn';
@@ -109,7 +119,50 @@ export class StreamPanel {
     container.appendChild(header);
     this.shadow.appendChild(container);
 
+    this.makeDraggable(dialog, header);
+
     return dialog;
+  }
+
+  /** Make the panel draggable by its header */
+  private makeDraggable(dialog: HTMLDialogElement, header: HTMLDivElement): void {
+    header.style.cursor = 'grab';
+
+    header.addEventListener('mousedown', (e: MouseEvent) => {
+      // Only drag on left-click on the header itself, not the close button
+      if (e.button !== 0) return;
+      if ((e.target as Element)?.closest('.close-btn')) return;
+
+      // Resolve current position — first drag starts from centered transform
+      const rect = dialog.getBoundingClientRect();
+      dialog.style.transform = 'none';
+      dialog.style.left = `${rect.left}px`;
+      dialog.style.top = `${rect.top}px`;
+
+      const startX = e.clientX - rect.left;
+      const startY = e.clientY - rect.top;
+
+      header.style.cursor = 'grabbing';
+
+      const abort = new AbortController();
+      this.dragAbort = abort;
+
+      document.addEventListener('mousemove', (moveE: MouseEvent) => {
+        const newLeft = moveE.clientX - startX;
+        const newTop  = moveE.clientY - startY;
+        // Clamp so panel stays on screen
+        const maxLeft = window.innerWidth  - dialog.offsetWidth;
+        const maxTop  = window.innerHeight - dialog.offsetHeight;
+        dialog.style.left = `${Math.max(0, Math.min(newLeft, maxLeft))}px`;
+        dialog.style.top  = `${Math.max(0, Math.min(newTop,  maxTop))}px`;
+      }, { signal: abort.signal });
+
+      document.addEventListener('mouseup', () => {
+        header.style.cursor = 'grab';
+        abort.abort();
+        this.dragAbort = null;
+      }, { signal: abort.signal, once: true });
+    });
   }
 
   /** Show loading skeleton (PNL-02: within 500ms of confirmation) */
@@ -151,6 +204,72 @@ export class StreamPanel {
     container.appendChild(msg);
     container.appendChild(setupBtn);
     body.appendChild(container);
+  }
+
+  /** Show editable scratchpad — user can trim extracted text before sending */
+  private showScratchpad(initialText: string): void {
+    if (this.titleEl) this.titleEl.textContent = 'Inspect';
+
+    const body = this.getOrCreateBody();
+    while (body.firstChild) body.removeChild(body.firstChild);
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'scratchpad-wrapper';
+
+    const textarea = document.createElement('textarea');
+    textarea.className = 'scratchpad-textarea';
+    textarea.setAttribute('aria-label', 'Extracted text — edit before sending');
+    // textContent via .value — plain string, no HTML parsing, XSS safe
+    textarea.value = initialText;
+    textarea.autofocus = true;
+
+    const charCount = document.createElement('div');
+    charCount.className = 'char-count';
+
+    const updateCharCount = () => {
+      const len = textarea.value.length;
+      charCount.textContent = `${len.toLocaleString()} / 20,000 chars`;
+      charCount.className = 'char-count' + (len >= 20_000 ? ' limit' : len >= 15_000 ? ' warn' : '');
+      sendBtn.disabled = textarea.value.trim().length === 0 || len > 20_000;
+    };
+
+    textarea.addEventListener('input', updateCharCount);
+
+    wrapper.appendChild(textarea);
+    wrapper.appendChild(charCount);
+    body.appendChild(wrapper);
+
+    // Action row
+    const container = this.shadow.querySelector('.panel-container')!;
+
+    const actions = document.createElement('div');
+    actions.className = 'scratchpad-actions';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'scratchpad-cancel-btn';
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.addEventListener('click', () => this.dismiss());
+
+    const sendBtn = document.createElement('button');
+    sendBtn.className = 'scratchpad-send-btn';
+    sendBtn.textContent = 'Send →';
+    sendBtn.addEventListener('click', () => {
+      const text = textarea.value.trim();
+      if (!text || text.length > 20_000) return;
+      sendBtn.disabled = true;
+      cancelBtn.disabled = true;
+      if (this.onSend) this.onSend(text);
+    });
+
+    actions.appendChild(cancelBtn);
+    actions.appendChild(sendBtn);
+    container.appendChild(actions);
+
+    // Init char count display
+    updateCharCount();
+
+    // Focus textarea after render
+    requestAnimationFrame(() => textarea.focus());
   }
 
   /** Start streaming mode — shows response area + cursor */
@@ -302,6 +421,8 @@ export class StreamPanel {
 
   /** Dismiss (close) the panel and cancel any in-flight OpenAI request */
   dismiss(): void {
+    this.dragAbort?.abort();
+    this.dragAbort = null;
     if (this.escapeHandler) {
       document.removeEventListener('keydown', this.escapeHandler, { capture: true });
       this.escapeHandler = null;
@@ -313,9 +434,11 @@ export class StreamPanel {
     document.removeEventListener('rba-interrupted', this.handleInterrupted as EventListener);
 
     // Cancel in-flight OpenAI request to stop BYOK charges (Suggestion A).
-    // Send 'rba-dismiss' CustomEvent — content-script listener calls port.disconnect()
-    // which triggers port.onDisconnect in service worker, firing abort.abort() in streaming.ts.
-    document.dispatchEvent(new CustomEvent('rba-dismiss'));
+    // Only fire rba-dismiss if a stream port was actually opened — scratchpad panels
+    // never open a port, so firing here would kill the next panel's port instead.
+    if (this.hasActiveStream) {
+      document.dispatchEvent(new CustomEvent('rba-dismiss'));
+    }
 
     this.dialog.close();
     this.dialog.remove();

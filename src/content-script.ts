@@ -5,6 +5,9 @@ import { showPanel } from './ui/panel';
 // MAX_CHARS guard — protects BYOK quota and prevents token explosion (Suggestion B)
 const MAX_CHARS = 20_000;
 
+// Custom cursor — green crosshair with filled dot, distinct from Win+Shift+S snipping tool
+const RBA_CURSOR = `url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><line x1='16' y1='0' x2='16' y2='13' stroke='%234CAF50' stroke-width='2'/><line x1='16' y1='19' x2='16' y2='32' stroke='%234CAF50' stroke-width='2'/><line x1='0' y1='16' x2='13' y2='16' stroke='%234CAF50' stroke-width='2'/><line x1='19' y1='16' x2='32' y2='16' stroke='%234CAF50' stroke-width='2'/><circle cx='16' cy='16' r='4' fill='%234CAF50'/></svg>") 16 16, crosshair`;
+
 const renderer = new SelectionRenderer();
 let isSelectionMode = false;
 let isDragging = false;
@@ -36,8 +39,8 @@ function activateSelectionMode(): void {
   if (isSelectionMode) return; // Prevent double-activation
   isSelectionMode = true;
 
-  // Set crosshair cursor (SEL-02 locked)
-  document.documentElement.style.cursor = 'crosshair';
+  // Set custom cursor (distinct from Win+Shift+S snipping tool crosshair)
+  document.documentElement.style.cursor = RBA_CURSOR;
 
   // Listen for mousedown to start drag
   const startAbort = new AbortController();
@@ -60,8 +63,8 @@ function activateSelectionMode(): void {
 
 function onMouseDown(e: MouseEvent): void {
   if (e.button !== 0) return; // Left click only
-  // Don't intercept clicks on the confirm button itself
-  if ((e.target as Element)?.id === 'rubber-band-ai-confirm') return;
+  // Don't intercept clicks on the confirm button container or its children
+  if ((e.target as Element)?.closest('#rubber-band-ai-confirm')) return;
   e.preventDefault();
 
   isDragging = true;
@@ -109,7 +112,7 @@ function deactivateSelectionMode(): void {
   isSelectionMode = false;
   isDragging = false;
 
-  // Restore cursor
+  // Restore default cursor
   document.documentElement.style.cursor = '';
 
   // Restore body in case cleanup was skipped
@@ -162,6 +165,35 @@ function openStreamPort(extractedText: string, retryContext?: string): void {
   port.postMessage({ type: 'generate', text: extractedText, retryContext });
 }
 
+/** Check API key and start streaming with given text. Used by both Analyze and scratchpad Send. */
+async function analyzeText(extractedText: string): Promise<void> {
+  // Check for API key (KEY-04).
+  console.log('[RBA] Checking API key...');
+  const hasKey = await Promise.race([
+    chrome.runtime.sendMessage({ type: 'check-api-key' }).catch((err) => { console.log('[RBA] check-api-key error:', err); return false; }),
+    new Promise<false>(resolve => setTimeout(() => { console.log('[RBA] check-api-key TIMED OUT'); resolve(false); }, 3000)),
+  ]);
+  console.log('[RBA] hasKey:', hasKey);
+  if (!hasKey) {
+    showPanel({ mode: 'setup' });
+    return;
+  }
+
+  // Show panel with loading skeleton (PNL-02)
+  console.log('[RBA] Showing panel...');
+  const panel = showPanel({
+    mode: 'loading',
+    onRetry: (retryContext: string) => {
+      panel.hasActiveStream = true;
+      openStreamPort(extractedText, retryContext);
+    },
+  });
+  // Mark stream as active before opening port so dismiss() fires rba-dismiss correctly
+  panel.hasActiveStream = true;
+  console.log('[RBA] Panel shown, opening stream port...');
+  openStreamPort(extractedText);
+}
+
 // Wire up confirm: extract text, check for key, open streaming port
 renderer.setOnConfirm(async (selectionRect: DOMRect) => {
   console.log('[RBA] Analyze clicked, rect:', selectionRect);
@@ -176,29 +208,26 @@ renderer.setOnConfirm(async (selectionRect: DOMRect) => {
     extractedText = extractedText.slice(0, MAX_CHARS) + '\n\n[Selection truncated \u2014 too large to send]';
   }
 
-  // Check for API key (KEY-04).
-  console.log('[RBA] Checking API key...');
-  const hasKey = await Promise.race([
-    chrome.runtime.sendMessage({ type: 'check-api-key' }).catch((err) => { console.log('[RBA] check-api-key error:', err); return false; }),
-    new Promise<false>(resolve => setTimeout(() => { console.log('[RBA] check-api-key TIMED OUT'); resolve(false); }, 3000)),
-  ]);
-  console.log('[RBA] hasKey:', hasKey);
-  if (!hasKey) {
-    // No key: show setup prompt in panel (per CONTEXT.md first-run decision)
-    showPanel({ mode: 'setup' });
-    return;
+  await analyzeText(extractedText);
+});
+
+// Wire up preview: extract text, show scratchpad panel for user to edit before sending
+renderer.setOnPreview(async (selectionRect: DOMRect) => {
+  console.log('[RBA] Edit text clicked, rect:', selectionRect);
+  deactivateSelectionMode();
+
+  let extractedText = extractVisibleText(document.documentElement, selectionRect);
+  console.log('[RBA] Extracted text length:', extractedText.length);
+
+  if (extractedText.length > MAX_CHARS) {
+    extractedText = extractedText.slice(0, MAX_CHARS) + '\n\n[Selection truncated \u2014 too large to send]';
   }
 
-  // Show panel with loading skeleton (PNL-02)
-  console.log('[RBA] Showing panel...');
   showPanel({
-    mode: 'loading',
-    onRetry: (retryContext: string) => {
-      openStreamPort(extractedText, retryContext);
+    mode: 'scratchpad',
+    initialText: extractedText,
+    onSend: async (editedText: string) => {
+      await analyzeText(editedText);
     },
   });
-  console.log('[RBA] Panel shown, opening stream port...');
-
-  // Open long-lived port to service worker and start streaming (LLM-03)
-  openStreamPort(extractedText);
 });

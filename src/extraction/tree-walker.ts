@@ -9,7 +9,15 @@ export function extractVisibleText(root: Element, selectionBounds: DOMRect): str
     bottom: selectionBounds.bottom,
   };
 
-  const parts: string[] = [];
+  // Block-level tags that represent visual line breaks in the DOM
+  const BLOCK_TAGS = new Set([
+    'P', 'DIV', 'LI', 'TR', 'TD', 'TH', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6',
+    'BLOCKQUOTE', 'PRE', 'SECTION', 'ARTICLE', 'HEADER', 'FOOTER', 'LABEL',
+    'OPTION', 'DT', 'DD', 'FIGCAPTION', 'CAPTION',
+  ]);
+
+  interface Part { text: string; isBlock: boolean; }
+  const parts: Part[] = [];
 
   const walker = document.createTreeWalker(
     root,
@@ -46,10 +54,32 @@ export function extractVisibleText(root: Element, selectionBounds: DOMRect): str
   while ((node = walker.nextNode()) !== null) {
     // NEVER use innerHTML — read textNode.data only (XSS constraint from CLAUDE.md)
     const text = (node as Text).data.trim();
-    if (text) {
-      parts.push(text);
+    if (!text) continue;
+
+    // Walk up to find nearest block ancestor within the selection root
+    let el: Element | null = (node as Text).parentElement;
+    let isBlock = false;
+    while (el && el !== root) {
+      if (BLOCK_TAGS.has(el.tagName)) { isBlock = true; break; }
+      el = el.parentElement;
+    }
+
+    parts.push({ text, isBlock });
+  }
+
+  // Join: block-level nodes get a newline before them (except the first),
+  // inline nodes are space-joined with their predecessor.
+  const out: string[] = [];
+  for (let i = 0; i < parts.length; i++) {
+    const { text, isBlock } = parts[i];
+    if (i === 0) {
+      out.push(text);
+    } else if (isBlock) {
+      out.push('\n' + text);
+    } else {
+      out.push(' ' + text);
     }
   }
 
-  return parts.join(' ');
+  return out.join('');
 }

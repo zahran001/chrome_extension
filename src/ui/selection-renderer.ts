@@ -7,14 +7,20 @@ export interface SelectionRect {
 
 export class SelectionRenderer {
   private svgOverlay: SVGSVGElement | null = null;
-  private confirmButton: HTMLButtonElement | null = null;
+  private confirmButton: HTMLElement | null = null;
   private onConfirm: ((rect: DOMRect) => void) | null = null;
+  private onPreview: ((rect: DOMRect) => void) | null = null;
   private selectionStart: { x: number; y: number } | null = null;
   private currentSelection: SelectionRect | null = null;
 
   /** Attach confirm callback before starting drag */
   setOnConfirm(cb: (rect: DOMRect) => void): void {
     this.onConfirm = cb;
+  }
+
+  /** Attach preview/scratchpad callback before starting drag */
+  setOnPreview(cb: (rect: DOMRect) => void): void {
+    this.onPreview = cb;
   }
 
   /** Called on mousedown to initialize the overlay SVG */
@@ -135,41 +141,41 @@ export class SelectionRenderer {
     this.svgOverlay?.remove();
     this.svgOverlay = null;
 
-    const btn = document.createElement('button');
-    btn.id = 'rubber-band-ai-confirm';
-    btn.setAttribute('aria-label', 'Analyze selection with AI');
-    btn.textContent = 'Analyze';
-
-    // Clamp to viewport so button is never off-screen
-    const btnWidth = 80;
-    const btnHeight = 32;
-    const clampedLeft = Math.min(rightX + 6, document.documentElement.clientWidth - btnWidth - 8);
-    const clampedTop = Math.min(bottomY + 6, document.documentElement.clientHeight - btnHeight - 8);
-
-    // Position just outside bottom-right corner (per CONTEXT.md locked decision)
-    Object.assign(btn.style, {
+    // Wrapper container holds both buttons side by side
+    const container = document.createElement('div');
+    container.id = 'rubber-band-ai-confirm';
+    Object.assign(container.style, {
       position: 'fixed',
-      left: `${clampedLeft}px`,
-      top: `${clampedTop}px`,
       zIndex: '2147483647',
-      background: '#4CAF50',
-      color: 'white',
+      display: 'flex',
+      gap: '6px',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+      borderRadius: '6px',
+      fontFamily: 'sans-serif',
+    });
+
+    // Shared button base styles
+    const baseStyle: Partial<CSSStyleDeclaration> = {
       border: 'none',
       borderRadius: '6px',
       padding: '6px 12px',
       fontSize: '13px',
       fontWeight: '600',
       cursor: 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-      fontFamily: 'sans-serif',
       lineHeight: '1',
       whiteSpace: 'nowrap',
-    });
+    };
 
-    btn.addEventListener('click', () => {
+    // Primary: Analyze
+    const analyzeBtn = document.createElement('button');
+    analyzeBtn.setAttribute('aria-label', 'Analyze selection with AI');
+    analyzeBtn.textContent = 'Analyze';
+    Object.assign(analyzeBtn.style, {
+      ...baseStyle,
+      background: '#4CAF50',
+      color: 'white',
+    });
+    analyzeBtn.addEventListener('click', () => {
       if (this.currentSelection && this.onConfirm) {
         const domRect = new DOMRect(
           this.currentSelection.x,
@@ -182,7 +188,41 @@ export class SelectionRenderer {
       }
     });
 
-    document.documentElement.appendChild(btn);
-    this.confirmButton = btn;
+    // Secondary: Edit text (scratchpad)
+    const editBtn = document.createElement('button');
+    editBtn.setAttribute('aria-label', 'Inspect and edit extracted text');
+    editBtn.textContent = '✎ Edit text';
+    Object.assign(editBtn.style, {
+      ...baseStyle,
+      background: '#ffffff',
+      color: '#333',
+      border: '1px solid #d0d0d0',
+    });
+    editBtn.addEventListener('click', () => {
+      if (this.currentSelection && this.onPreview) {
+        const domRect = new DOMRect(
+          this.currentSelection.x,
+          this.currentSelection.y,
+          this.currentSelection.width,
+          this.currentSelection.height
+        );
+        this.cleanup();
+        this.onPreview(domRect);
+      }
+    });
+
+    container.appendChild(analyzeBtn);
+    container.appendChild(editBtn);
+
+    // Clamp to viewport — measure combined width estimate (2 buttons ~180px)
+    const containerWidth = 186;
+    const containerHeight = 32;
+    const clampedLeft = Math.min(rightX + 6, document.documentElement.clientWidth - containerWidth - 8);
+    const clampedTop = Math.min(bottomY + 6, document.documentElement.clientHeight - containerHeight - 8);
+    container.style.left = `${clampedLeft}px`;
+    container.style.top = `${clampedTop}px`;
+
+    document.documentElement.appendChild(container);
+    this.confirmButton = container;
   }
 }
