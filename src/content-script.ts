@@ -166,7 +166,12 @@ function openStreamPort(extractedText: string, retryContext?: string): void {
 }
 
 /** Check API key and start streaming with given text. Used by both Analyze and scratchpad Send. */
-async function analyzeText(extractedText: string): Promise<void> {
+async function analyzeText(
+  extractedText: string,
+  pageUrl = window.location.href,
+  pageTitle = document.title,
+  containerTag = window.location.hostname,
+): Promise<void> {
   // Check for API key (KEY-04).
   console.log('[RBA] Checking API key...');
   const hasKey = await Promise.race([
@@ -183,6 +188,10 @@ async function analyzeText(extractedText: string): Promise<void> {
   console.log('[RBA] Showing panel...');
   const panel = showPanel({
     mode: 'loading',
+    selectedText: extractedText,
+    pageUrl,
+    pageTitle,
+    containerTag,
     onRetry: (retryContext: string) => {
       panel.hasActiveStream = true;
       openStreamPort(extractedText, retryContext);
@@ -199,6 +208,11 @@ renderer.setOnConfirm(async (selectionRect: DOMRect) => {
   console.log('[RBA] Analyze clicked, rect:', selectionRect);
   deactivateSelectionMode();
 
+  // Capture page metadata synchronously at selection time (SPA-safe)
+  const pageUrl = window.location.href;
+  const pageTitle = document.title;
+  const containerTag = window.location.hostname;
+
   // Extract visible text from selection bounds (EXT-01, EXT-02, EXT-03)
   let extractedText = extractVisibleText(document.documentElement, selectionRect);
   console.log('[RBA] Extracted text length:', extractedText.length, 'preview:', extractedText.slice(0, 100));
@@ -208,13 +222,18 @@ renderer.setOnConfirm(async (selectionRect: DOMRect) => {
     extractedText = extractedText.slice(0, MAX_CHARS) + '\n\n[Selection truncated \u2014 too large to send]';
   }
 
-  await analyzeText(extractedText);
+  await analyzeText(extractedText, pageUrl, pageTitle, containerTag);
 });
 
 // Wire up preview: extract text, show scratchpad panel for user to edit before sending
 renderer.setOnPreview(async (selectionRect: DOMRect) => {
   console.log('[RBA] Edit text clicked, rect:', selectionRect);
   deactivateSelectionMode();
+
+  // Capture page metadata synchronously at selection time (SPA-safe)
+  const pageUrl = window.location.href;
+  const pageTitle = document.title;
+  const containerTag = window.location.hostname;
 
   let extractedText = extractVisibleText(document.documentElement, selectionRect);
   console.log('[RBA] Extracted text length:', extractedText.length);
@@ -226,8 +245,11 @@ renderer.setOnPreview(async (selectionRect: DOMRect) => {
   showPanel({
     mode: 'scratchpad',
     initialText: extractedText,
+    pageUrl,
+    pageTitle,
+    containerTag,
     onSend: async (editedText: string) => {
-      await analyzeText(editedText);
+      await analyzeText(editedText, pageUrl, pageTitle, containerTag);
     },
   });
 });

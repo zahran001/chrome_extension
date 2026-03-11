@@ -8,6 +8,10 @@ export interface PanelOptions {
   onRetry?: (retryContext: string) => void;
   onSend?: (text: string) => void;
   initialText?: string;
+  selectedText?: string;
+  pageUrl?: string;
+  pageTitle?: string;
+  containerTag?: string;
 }
 
 let activePanel: StreamPanel | null = null;
@@ -34,10 +38,18 @@ export class StreamPanel {
   /** True only after a stream port has been opened — guards rba-dismiss from firing prematurely */
   hasActiveStream = false;
   private dragAbort: AbortController | null = null;
+  private selectedText = '';
+  private pageUrl = '';
+  private pageTitle = '';
+  private containerTag = '';
 
   constructor(options: PanelOptions) {
     this.onRetry = options.onRetry ?? null;
     this.onSend = options.onSend ?? null;
+    this.selectedText = options.selectedText ?? '';
+    this.pageUrl = options.pageUrl ?? '';
+    this.pageTitle = options.pageTitle ?? '';
+    this.containerTag = options.containerTag ?? '';
     this.dialog = this.createDialog();
     document.documentElement.appendChild(this.dialog);
     this.dialog.showModal(); // Top Layer (PNL-01)
@@ -384,6 +396,49 @@ export class StreamPanel {
     });
 
     actionBar.appendChild(copyBtn);
+
+    // Bookmark button — only shown if Supermemory key is configured
+    chrome.runtime.sendMessage({ type: 'check-supermemory-key' }).then((hasKey: boolean) => {
+      if (!hasKey) return;
+
+      const bookmarkBtn = document.createElement('button');
+      bookmarkBtn.className = 'bookmark-btn';
+      bookmarkBtn.textContent = 'Bookmark \u2606';
+      bookmarkBtn.setAttribute('aria-label', 'Save this result to Supermemory');
+
+      bookmarkBtn.addEventListener('click', async () => {
+        bookmarkBtn.disabled = true;
+        bookmarkBtn.textContent = 'Saving\u2026';
+
+        const response = await chrome.runtime.sendMessage({
+          type: 'remember',
+          selectedText: this.selectedText,
+          aiResponse: this.accumulatedText,
+          url: this.pageUrl,
+          title: this.pageTitle,
+          containerTag: this.containerTag,
+        }).catch(() => ({ ok: false, error: 'Message failed' }));
+
+        if (response?.ok) {
+          bookmarkBtn.textContent = 'Bookmarked \u2605';
+          bookmarkBtn.classList.add('bookmarked');
+        } else if (response?.error === 'no-key') {
+          bookmarkBtn.textContent = 'No key \u2014 open settings';
+          bookmarkBtn.classList.add('bookmark-error');
+          bookmarkBtn.disabled = false;
+          bookmarkBtn.addEventListener('click', () => {
+            chrome.runtime.sendMessage({ type: 'open-popup' });
+          }, { once: true });
+        } else {
+          bookmarkBtn.textContent = 'Failed \u2014 retry?';
+          bookmarkBtn.classList.add('bookmark-error');
+          bookmarkBtn.disabled = false;
+        }
+      });
+
+      actionBar.appendChild(bookmarkBtn);
+    }).catch(() => { /* Supermemory key check failed — silently skip button */ });
+
     container.appendChild(actionBar);
 
     // Retry section (locked decision: text input + Enter/Send)

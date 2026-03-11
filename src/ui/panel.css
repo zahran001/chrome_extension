@@ -340,3 +340,29 @@
 
 .scratchpad-send-btn:hover { background: #43A047; }
 .scratchpad-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Bookmark button */
+.bookmark-btn {
+  background: #f5f5f5;
+  border: 1px solid #d0d0d0;
+  color: #333;
+  padding: 7px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background 0.1s, color 0.1s, border-color 0.1s;
+}
+
+.bookmark-btn:hover:not(:disabled) { background: #ebebeb; }
+.bookmark-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.bookmark-btn.bookmarked {
+  color: #2e7d32;
+  border-color: #4CAF50;
+}
+
+.bookmark-btn.bookmark-error {
+  color: #c62828;
+  border-color: #c62828;
+}

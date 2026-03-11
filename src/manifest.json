@@ -34,7 +34,7 @@
     }
   },
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'; connect-src https://api.openai.com"
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src https://api.openai.com https://api.supermemory.ai"
   },
   "web_accessible_resources": [
     {

@@ -1,4 +1,5 @@
 import { getApiKey, saveApiKey, clearApiKey } from './storage/keys';
+import { getSupermemoryKey, saveSupermemoryKey, clearSupermemoryKey } from './storage/supermemory-keys';
 
 const apiKeyInput = document.getElementById('api-key') as HTMLInputElement;
 const toggleBtn = document.getElementById('toggle-visibility') as HTMLButtonElement;
@@ -111,5 +112,73 @@ function clearStatus(): void {
   keyStatus.className = 'key-status';
 }
 
+// ── Supermemory key section ──────────────────────────────────────────────────
+
+const smKeyInput = document.getElementById('sm-api-key') as HTMLInputElement;
+const smToggleBtn = document.getElementById('sm-toggle-visibility') as HTMLButtonElement;
+const smEyeIcon = document.getElementById('sm-eye-icon') as HTMLSpanElement;
+const smKeyStatus = document.getElementById('sm-key-status') as HTMLDivElement;
+const smSaveKeyBtn = document.getElementById('sm-save-key') as HTMLButtonElement;
+const smClearKeyBtn = document.getElementById('sm-clear-key') as HTMLButtonElement;
+
+async function loadExistingSmKey(): Promise<void> {
+  const existingKey = await getSupermemoryKey();
+  if (existingKey) {
+    smKeyInput.value = existingKey;
+    showSmStatus('Key loaded from storage.', 'info');
+  }
+}
+
+smToggleBtn.addEventListener('click', () => {
+  const isPassword = smKeyInput.type === 'password';
+  smKeyInput.type = isPassword ? 'text' : 'password';
+  smEyeIcon.textContent = isPassword ? '\u{1F648}' : '\u{1F441}';
+  smToggleBtn.setAttribute('aria-label', isPassword ? 'Hide key' : 'Show key');
+});
+
+smSaveKeyBtn.addEventListener('click', async () => {
+  const key = smKeyInput.value.trim();
+  if (!key) {
+    showSmStatus('Enter a key first.', 'error');
+    return;
+  }
+  smSaveKeyBtn.disabled = true;
+  try {
+    await saveSupermemoryKey(key);
+    smKeyInput.classList.add('saved');
+    showSmStatus('Key saved \u2713', 'success');
+  } catch (_err) {
+    showSmStatus('Failed to save key. Try again.', 'error');
+  } finally {
+    smSaveKeyBtn.disabled = false;
+  }
+});
+
+smClearKeyBtn.addEventListener('click', async () => {
+  smClearKeyBtn.disabled = true;
+  try {
+    await clearSupermemoryKey();
+    smKeyInput.value = '';
+    smKeyInput.classList.remove('saved');
+    showSmStatus('Key cleared.', 'info');
+  } catch (_err) {
+    showSmStatus('Failed to clear key.', 'error');
+  } finally {
+    smClearKeyBtn.disabled = false;
+  }
+});
+
+smKeyInput.addEventListener('input', () => {
+  smKeyInput.classList.remove('saved');
+  smKeyStatus.textContent = '';
+  smKeyStatus.className = 'key-status';
+});
+
+function showSmStatus(message: string, type: 'success' | 'error' | 'warning' | 'info'): void {
+  smKeyStatus.textContent = message;
+  smKeyStatus.className = `key-status ${type}`;
+}
+
 // Initialize
 loadExistingKey();
+loadExistingSmKey();

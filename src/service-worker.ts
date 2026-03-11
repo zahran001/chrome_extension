@@ -1,5 +1,7 @@
 import { streamToPort } from './llm/streaming';
 import { hasApiKey } from './storage/keys';
+import { hasSupermemoryKey, getSupermemoryKey } from './storage/supermemory-keys';
+import { rememberDocument } from './storage/supermemory';
 
 /**
  * Alt+S keyboard command: activate selection mode in the active tab's content script.
@@ -35,6 +37,38 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     // chrome.tabs.create is 100% reliable across all Chrome versions (Issue C fix).
     chrome.tabs.create({ url: chrome.runtime.getURL('src/popup.html') });
     sendResponse(true);
+  }
+
+  if (message.type === 'check-supermemory-key') {
+    hasSupermemoryKey().then(result => sendResponse(result));
+    return true;
+  }
+
+  if (message.type === 'remember') {
+    console.log('[RBA SW] remember: received');
+    getSupermemoryKey().then(async (key) => {
+      console.log('[RBA SW] remember: key present?', !!key);
+      if (!key) {
+        sendResponse({ ok: false, error: 'no-key' });
+        return;
+      }
+      try {
+        await rememberDocument(key, {
+          selectedText: message.selectedText,
+          aiResponse: message.aiResponse,
+          url: message.url,
+          title: message.title,
+          containerTag: message.containerTag,
+        });
+        console.log('[RBA SW] remember: success');
+        sendResponse({ ok: true });
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.error('[RBA SW] remember: error', msg);
+        sendResponse({ ok: false, error: msg });
+      }
+    });
+    return true; // async
   }
 });
 

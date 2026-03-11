@@ -28,6 +28,7 @@
         </button>
       </div>
       <div id="key-status" class="key-status" role="alert" aria-live="polite"></div>
+      <p class="sm-hint"><a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">Get a key at platform.openai.com</a></p>
     </section>
 
     <div class="button-row">
@@ -36,8 +37,30 @@
       <button id="save-key" class="primary-btn">Save</button>
     </div>
 
+    <section class="key-section sm-section">
+      <label for="sm-api-key">Supermemory API Key <span class="optional-badge">optional</span></label>
+      <div class="input-wrapper">
+        <input
+          type="password"
+          id="sm-api-key"
+          placeholder="sm-..."
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button id="sm-toggle-visibility" class="icon-btn" aria-label="Toggle Supermemory key visibility" title="Show/hide key">
+          <span id="sm-eye-icon">&#128065;</span>
+        </button>
+      </div>
+      <div id="sm-key-status" class="key-status" role="alert" aria-live="polite"></div>
+      <div class="sm-button-row">
+        <button id="sm-clear-key" class="danger-btn">Clear</button>
+        <button id="sm-save-key" class="primary-btn">Save</button>
+      </div>
+      <p class="sm-hint">Enables &#8220;Bookmark &#9734;&#8221; on results. <a href="https://supermemory.ai" target="_blank" rel="noopener">Get a free key</a></p>
+    </section>
+
     <footer>
-      <p class="footer-note">Your key is stored locally. Zero telemetry.</p>
+      <p class="footer-note">Your keys are stored locally. Zero telemetry.</p>
     </footer>
   </div>
   <script type="module" src="./popup.ts"></script>

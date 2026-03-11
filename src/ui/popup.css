@@ -149,6 +149,46 @@ header h1 {
 .danger-btn:hover { background: #ffebee; }
 .danger-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+/* Supermemory section */
+.sm-section {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 16px;
+}
+
+.optional-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: #888;
+  background: #f0f0f0;
+  border-radius: 4px;
+  padding: 1px 5px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sm-button-row {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.sm-hint {
+  font-size: 11px;
+  color: #888;
+  margin-top: 6px;
+}
+
+.sm-hint a {
+  color: #4CAF50;
+  text-decoration: none;
+}
+
+.sm-hint a:hover {
+  text-decoration: underline;
+}
+
 footer {
   border-top: 1px solid #f0f0f0;
   padding-top: 10px;
