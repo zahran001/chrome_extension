@@ -1,6 +1,63 @@
 import { rectsIntersect, Rect } from './aabb';
 import { isVisible } from './visibility';
 
+const BLOCK_TAGS = new Set([
+  'P', 'DIV', 'LI', 'TR', 'TD', 'TH', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6',
+  'BLOCKQUOTE', 'PRE', 'SECTION', 'ARTICLE', 'HEADER', 'FOOTER', 'LABEL',
+  'OPTION', 'DT', 'DD', 'FIGCAPTION', 'CAPTION',
+]);
+
+interface Part { text: string; isBlock: boolean; }
+
+function walkNode(
+  node: Node,
+  selection: Rect,
+  parts: Part[],
+  scopeRoot: Element | ShadowRoot,
+): void {
+  if (node.nodeType === Node.TEXT_NODE) {
+    const parent = (node as Text).parentElement;
+    if (!parent) return;
+
+    // CLAUDE.md check order: visibility → zero-dim → AABB
+    if (!isVisible(parent)) return;
+    // parentElement here is the immediate parent inside the shadow tree (e.g. <p>),
+    // NOT the shadow host — so getBoundingClientRect() returns real rendered dims.
+    const rect = parent.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return;
+    if (!rectsIntersect({ left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom }, selection)) return;
+
+    const text = (node as Text).data.trim();
+    if (!text) return;
+
+    let el: Element | null = parent;
+    let isBlock = false;
+    const boundary = scopeRoot instanceof ShadowRoot ? null : scopeRoot as Element;
+    while (el && el !== boundary) {
+      if (BLOCK_TAGS.has(el.tagName)) { isBlock = true; break; }
+      el = el.parentElement;
+    }
+    parts.push({ text, isBlock });
+
+  } else if (node.nodeType === Node.ELEMENT_NODE) {
+    const el = node as Element;
+
+    // Pierce open shadow roots in document order before light DOM children.
+    // Closed shadow roots return null — skipped silently.
+    if (el.shadowRoot) {
+      const shadowChildren = el.shadowRoot.childNodes;
+      for (let i = 0; i < shadowChildren.length; i++) {
+        walkNode(shadowChildren[i], selection, parts, el.shadowRoot);
+      }
+    }
+
+    const children = el.childNodes;
+    for (let i = 0; i < children.length; i++) {
+      walkNode(children[i], selection, parts, scopeRoot);
+    }
+  }
+}
+
 export function extractVisibleText(root: Element, selectionBounds: DOMRect): string {
   const selection: Rect = {
     left: selectionBounds.left,
@@ -9,66 +66,9 @@ export function extractVisibleText(root: Element, selectionBounds: DOMRect): str
     bottom: selectionBounds.bottom,
   };
 
-  // Block-level tags that represent visual line breaks in the DOM
-  const BLOCK_TAGS = new Set([
-    'P', 'DIV', 'LI', 'TR', 'TD', 'TH', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6',
-    'BLOCKQUOTE', 'PRE', 'SECTION', 'ARTICLE', 'HEADER', 'FOOTER', 'LABEL',
-    'OPTION', 'DT', 'DD', 'FIGCAPTION', 'CAPTION',
-  ]);
-
-  interface Part { text: string; isBlock: boolean; }
   const parts: Part[] = [];
+  walkNode(root, selection, parts, root);
 
-  const walker = document.createTreeWalker(
-    root,
-    NodeFilter.SHOW_TEXT,
-    {
-      acceptNode(node: Text): number {
-        const parent = node.parentElement;
-        if (!parent) return NodeFilter.FILTER_REJECT;
-
-        // 1. Visibility check first (skips display:none, visibility:hidden, opacity:0)
-        if (!isVisible(parent)) return NodeFilter.FILTER_REJECT;
-
-        // 2. Get bounding rect once — used for both zero-dimension fast-fail and AABB check
-        const rect = parent.getBoundingClientRect();
-
-        // 3. Zero-dimension fast-fail BEFORE AABB (per CLAUDE.md constraint)
-        if (rect.width === 0 || rect.height === 0) return NodeFilter.FILTER_REJECT;
-
-        // 4. AABB intersection check against selection bounds
-        const nodeRect: Rect = {
-          left: rect.left,
-          right: rect.right,
-          top: rect.top,
-          bottom: rect.bottom,
-        };
-        if (!rectsIntersect(nodeRect, selection)) return NodeFilter.FILTER_REJECT;
-
-        return NodeFilter.FILTER_ACCEPT;
-      },
-    }
-  );
-
-  let node: Node | null;
-  while ((node = walker.nextNode()) !== null) {
-    // NEVER use innerHTML — read textNode.data only (XSS constraint from CLAUDE.md)
-    const text = (node as Text).data.trim();
-    if (!text) continue;
-
-    // Walk up to find nearest block ancestor within the selection root
-    let el: Element | null = (node as Text).parentElement;
-    let isBlock = false;
-    while (el && el !== root) {
-      if (BLOCK_TAGS.has(el.tagName)) { isBlock = true; break; }
-      el = el.parentElement;
-    }
-
-    parts.push({ text, isBlock });
-  }
-
-  // Join: block-level nodes get a newline before them (except the first),
-  // inline nodes are space-joined with their predecessor.
   const out: string[] = [];
   for (let i = 0; i < parts.length; i++) {
     const { text, isBlock } = parts[i];
