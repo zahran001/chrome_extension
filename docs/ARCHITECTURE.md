@@ -1,4 +1,4 @@
-# Rubber-Band AI — Enterprise-Grade Chrome Extension Architecture
+# Scoop — Chrome Extension Architecture
 
 ## 1. Objective
 

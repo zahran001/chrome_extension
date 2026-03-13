@@ -1,4 +1,4 @@
-# Rubber-Band AI — Chrome Extension
+# Scoop — Chrome Extension
 
 Chrome MV3 extension. Alt+S activates rubber-band selection → DOM text extracted → streamed to OpenAI → result in floating Top Layer panel. BYOK (OpenAI key). No backend. No persistence.
 

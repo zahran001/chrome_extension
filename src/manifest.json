@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Rubber-Band AI",
+  "name": "Scoop",
   "version": "0.1.0",
   "description": "Select anything on screen, understand it immediately.",
   "permissions": [
@@ -23,14 +23,14 @@
   ],
   "action": {
     "default_popup": "src/popup.html",
-    "default_title": "Rubber-Band AI Settings"
+    "default_title": "Scoop Settings"
   },
   "commands": {
     "activate-selection": {
       "suggested_key": {
         "default": "Alt+S"
       },
-      "description": "Activate rubber-band selection mode"
+      "description": "Activate Scoop selection mode"
     }
   },
   "content_security_policy": {
