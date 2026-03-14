@@ -199,3 +199,139 @@ footer {
   color: #999;
   text-align: center;
 }
+
+/* Tab navigation */
+.tab-nav {
+  display: flex;
+  gap: 4px;
+  margin-top: 10px;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 0;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #888;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  border-radius: 4px 4px 0 0;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.tab-btn:hover { color: #444; }
+.tab-btn.active { color: #4CAF50; border-bottom-color: #4CAF50; }
+
+.tab-panel { padding-top: 14px; }
+.tab-panel.hidden { display: none; }
+
+/* Bookmarks */
+.bookmarks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.bookmarks-empty {
+  font-size: 12px;
+  color: #888;
+  text-align: center;
+  padding: 20px 0;
+}
+
+.bookmark-card {
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  background: #fafafa;
+}
+
+.bookmark-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bookmark-url {
+  font-size: 11px;
+  color: #4CAF50;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bookmark-date {
+  font-size: 11px;
+  color: #aaa;
+}
+
+.bookmark-expand-btn {
+  margin-top: 6px;
+  background: none;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: #555;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+}
+
+.bookmark-expand-btn:hover { background: #f0f0f0; }
+.bookmark-expand-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.bookmark-chunks {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bookmark-chunks.hidden { display: none; }
+
+.chunk-item {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 6px 8px;
+  background: #fff;
+  border: 1px solid #eeeeee;
+  border-radius: 6px;
+}
+
+.chunk-pos {
+  font-size: 10px;
+  font-weight: 700;
+  color: #aaa;
+  white-space: nowrap;
+  padding-top: 1px;
+  min-width: 20px;
+}
+
+.chunk-text {
+  font-size: 11px;
+  color: #333;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.chunk-empty {
+  font-size: 11px;
+  color: #aaa;
+  text-align: center;
+  padding: 8px 0;
+}

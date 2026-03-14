@@ -182,3 +182,122 @@ function showSmStatus(message: string, type: 'success' | 'error' | 'warning' | '
 // Initialize
 loadExistingKey();
 loadExistingSmKey();
+
+// ── Bookmarks tab ─────────────────────────────────────────────────────────────
+
+const tabBtns = document.querySelectorAll<HTMLButtonElement>('.tab-btn');
+const tabPanels = document.querySelectorAll<HTMLDivElement>('.tab-panel');
+
+tabBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = btn.dataset.tab;
+    tabBtns.forEach(b => b.classList.toggle('active', b === btn));
+    tabPanels.forEach(p => p.classList.toggle('hidden', p.id !== `tab-${target}`));
+    if (target === 'bookmarks') loadBookmarks();
+  });
+});
+
+async function loadBookmarks(): Promise<void> {
+  const list = document.getElementById('bookmarks-list')!;
+  list.innerHTML = '';
+
+  const loadingEl = document.createElement('p');
+  loadingEl.className = 'bookmarks-empty';
+  loadingEl.textContent = 'Loading\u2026';
+  list.appendChild(loadingEl);
+
+  const res = await chrome.runtime.sendMessage({ type: 'list-bookmarks' }).catch(() => null);
+
+  list.innerHTML = '';
+
+  if (!res?.ok) {
+    const msg = document.createElement('p');
+    msg.className = 'bookmarks-empty';
+    msg.textContent = res?.error === 'no-key'
+      ? 'Add a Supermemory key in Settings to see bookmarks.'
+      : `Error: ${res?.error ?? 'Unknown error'}`;
+    list.appendChild(msg);
+    return;
+  }
+
+  const items: Array<{ id: string; title: string | null; summary: string | null; createdAt: string; metadata: Record<string, unknown> | null }> = res.items;
+
+  if (!items.length) {
+    const msg = document.createElement('p');
+    msg.className = 'bookmarks-empty';
+    msg.textContent = 'No bookmarks yet. Use \u201cBookmark \u2606\u201d after a result.';
+    list.appendChild(msg);
+    return;
+  }
+
+  items.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'bookmark-card';
+
+    const titleEl = document.createElement('div');
+    titleEl.className = 'bookmark-title';
+    titleEl.textContent = (item.metadata?.title as string) || item.title || 'Untitled';
+
+    const urlEl = document.createElement('div');
+    urlEl.className = 'bookmark-url';
+    const url = item.metadata?.url as string | undefined;
+    urlEl.textContent = url ? new URL(url).hostname : '';
+
+    const dateEl = document.createElement('div');
+    dateEl.className = 'bookmark-date';
+    dateEl.textContent = new Date(item.createdAt).toLocaleDateString();
+
+    const chunksEl = document.createElement('div');
+    chunksEl.className = 'bookmark-chunks hidden';
+
+    const expandBtn = document.createElement('button');
+    expandBtn.className = 'bookmark-expand-btn';
+    expandBtn.textContent = 'Show chunks \u25be';
+    expandBtn.addEventListener('click', async () => {
+      if (!chunksEl.classList.contains('hidden')) {
+        chunksEl.classList.add('hidden');
+        expandBtn.textContent = 'Show chunks \u25be';
+        return;
+      }
+      expandBtn.disabled = true;
+      expandBtn.textContent = 'Loading\u2026';
+      const chunkRes = await chrome.runtime.sendMessage({ type: 'get-chunks', docId: item.id }).catch(() => null);
+      expandBtn.disabled = false;
+      if (!chunkRes?.ok) {
+        expandBtn.textContent = 'Failed \u2014 retry?';
+        return;
+      }
+      chunksEl.innerHTML = '';
+      const chunks: Array<{ id: string; position: number; content: string; type: string }> = chunkRes.chunks;
+      if (!chunks.length) {
+        const empty = document.createElement('p');
+        empty.className = 'chunk-empty';
+        empty.textContent = 'No chunks available.';
+        chunksEl.appendChild(empty);
+      } else {
+        chunks.forEach(chunk => {
+          const chunkEl = document.createElement('div');
+          chunkEl.className = 'chunk-item';
+          const pos = document.createElement('span');
+          pos.className = 'chunk-pos';
+          pos.textContent = `#${chunk.position + 1}`;
+          const text = document.createElement('span');
+          text.className = 'chunk-text';
+          text.textContent = chunk.content;
+          chunkEl.appendChild(pos);
+          chunkEl.appendChild(text);
+          chunksEl.appendChild(chunkEl);
+        });
+      }
+      chunksEl.classList.remove('hidden');
+      expandBtn.textContent = 'Hide chunks \u25b4';
+    });
+
+    card.appendChild(titleEl);
+    if (url) card.appendChild(urlEl);
+    card.appendChild(dateEl);
+    card.appendChild(expandBtn);
+    card.appendChild(chunksEl);
+    list.appendChild(card);
+  });
+}

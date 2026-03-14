@@ -1,7 +1,7 @@
 import { streamToPort } from './llm/streaming';
 import { hasApiKey } from './storage/keys';
 import { hasSupermemoryKey, getSupermemoryKey } from './storage/supermemory-keys';
-import { rememberDocument } from './storage/supermemory';
+import { rememberDocument, listBookmarks, getDocumentChunks } from './storage/supermemory';
 
 /**
  * Alt+S keyboard command: activate selection mode in the active tab's content script.
@@ -41,6 +41,32 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
   if (message.type === 'check-supermemory-key') {
     hasSupermemoryKey().then(result => sendResponse(result));
+    return true;
+  }
+
+  if (message.type === 'list-bookmarks') {
+    getSupermemoryKey().then(async (key) => {
+      if (!key) { sendResponse({ ok: false, error: 'no-key' }); return; }
+      try {
+        const items = await listBookmarks(key);
+        sendResponse({ ok: true, items });
+      } catch (err) {
+        sendResponse({ ok: false, error: err instanceof Error ? err.message : String(err) });
+      }
+    });
+    return true;
+  }
+
+  if (message.type === 'get-chunks') {
+    getSupermemoryKey().then(async (key) => {
+      if (!key) { sendResponse({ ok: false, error: 'no-key' }); return; }
+      try {
+        const chunks = await getDocumentChunks(key, message.docId);
+        sendResponse({ ok: true, chunks });
+      } catch (err) {
+        sendResponse({ ok: false, error: err instanceof Error ? err.message : String(err) });
+      }
+    });
     return true;
   }
 
