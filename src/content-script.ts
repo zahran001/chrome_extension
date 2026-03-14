@@ -91,7 +91,8 @@ function onMouseDown(e: MouseEvent): void {
     // Restore scrolling immediately (SEL-04, Pitfall 5)
     document.body.style.overflow = '';
     document.body.style.userSelect = '';
-    renderer.endDrag(upEvent.clientX, upEvent.clientY);
+    const validSelection = renderer.endDrag(upEvent.clientX, upEvent.clientY);
+    if (!validSelection) deactivateSelectionMode();
   }, { signal: perDragAbort.signal, once: true });
 
   document.addEventListener('keydown', (keyEvent) => {

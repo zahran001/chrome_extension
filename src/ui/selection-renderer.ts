@@ -43,8 +43,9 @@ export class SelectionRenderer {
   }
 
   /** Called on mouseup — remove rubber-band, show confirm button */
-  endDrag(endX: number, endY: number): void {
-    if (!this.selectionStart) return;
+  /** Returns false if the selection was too small (caller should deactivate selection mode). */
+  endDrag(endX: number, endY: number): boolean {
+    if (!this.selectionStart) return false;
 
     const x = Math.min(this.selectionStart.x, endX);
     const y = Math.min(this.selectionStart.y, endY);
@@ -54,11 +55,12 @@ export class SelectionRenderer {
     // Skip if selection is too small (< 4x4px — accidental click)
     if (width < 4 || height < 4) {
       this.cleanup();
-      return;
+      return false;
     }
 
     this.currentSelection = { x, y, width, height };
     this.showConfirmButton(x + width, y + height);
+    return true;
   }
 
   /** Remove all visual elements (cancel or after confirm) */
