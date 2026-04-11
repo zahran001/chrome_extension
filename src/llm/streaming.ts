@@ -1,5 +1,5 @@
 import { createOpenAIClient, OPENAI_MODEL } from './openai';
-import { buildPrompt } from './prompts';
+import { buildPrompt, getMcqMode } from './prompts';
 
 export interface StreamMessage {
   type: 'generate';
@@ -33,7 +33,8 @@ export async function streamToPort(
 
   try {
     const client = await createOpenAIClient();
-    const { system, user } = buildPrompt(message.text, message.retryContext);
+    const mcqMode = await getMcqMode();
+    const { system, user } = buildPrompt(message.text, message.retryContext, mcqMode);
 
     const stream = await client.chat.completions.create(
       {

@@ -1,5 +1,6 @@
 import { getApiKey, saveApiKey, clearApiKey } from './storage/keys';
 import { getSupermemoryKey, saveSupermemoryKey, clearSupermemoryKey } from './storage/supermemory-keys';
+import { getMcqMode, setMcqMode } from './llm/prompts';
 
 const apiKeyInput = document.getElementById('api-key') as HTMLInputElement;
 const toggleBtn = document.getElementById('toggle-visibility') as HTMLButtonElement;
@@ -179,9 +180,22 @@ function showSmStatus(message: string, type: 'success' | 'error' | 'warning' | '
   smKeyStatus.className = `key-status ${type}`;
 }
 
+// ── MCQ Mode toggle ──────────────────────────────────────────────────────────
+
+const mcqToggle = document.getElementById('mcq-toggle') as HTMLInputElement;
+
+async function loadMcqMode(): Promise<void> {
+  mcqToggle.checked = await getMcqMode();
+}
+
+mcqToggle.addEventListener('change', () => {
+  setMcqMode(mcqToggle.checked);
+});
+
 // Initialize
 loadExistingKey();
 loadExistingSmKey();
+loadMcqMode();
 
 // ── Bookmarks tab ─────────────────────────────────────────────────────────────
 
